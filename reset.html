@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reinicio de Intentos - Snake para Teresa Elizabeth</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #ffd6e7;
+            background-image: linear-gradient(135deg, #ffd6e7 0%, #ffb6d9 100%);
+            color: #ff66b3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .container {
+            background-color: rgba(255, 255, 255, 0.92);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(255, 105, 180, 0.4);
+            max-width: 600px;
+            width: 90%;
+        }
+        
+        h1 {
+            color: #ff1493;
+            text-shadow: 2px 2px 4px rgba(255, 105, 180, 0.6);
+            margin-bottom: 20px;
+        }
+        
+        p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .result {
+            font-weight: bold;
+            font-size: 1.2em;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            background-color: #fff0f5;
+        }
+        
+        .success {
+            color: #00aa00;
+        }
+        
+        .warning {
+            color: #ff6600;
+        }
+        
+        .error {
+            color: #ff0000;
+        }
+        
+        button {
+            padding: 12px 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            background: linear-gradient(45deg, #ff66b3, #ff1493);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(255, 105, 180, 0.4);
+            margin: 10px;
+        }
+        
+        button:hover {
+            background: linear-gradient(45deg, #ff1493, #ff66b3);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 20, 147, 0.5);
+        }
+        
+        .back-link {
+            margin-top: 20px;
+            color: #ff66b3;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .back-link:hover {
+            color: #ff1493;
+            text-decoration: underline;
+        }
+        
+        .password-container {
+            margin: 20px 0;
+        }
+        
+        input[type="password"] {
+            padding: 10px 15px;
+            border-radius: 25px;
+            border: 2px solid #ffb6d9;
+            font-size: 1em;
+            width: 200px;
+            text-align: center;
+            outline: none;
+        }
+        
+        input[type="password"]:focus {
+            border-color: #ff66b3;
+            box-shadow: 0 0 8px rgba(255, 102, 179, 0.6);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Reinicio de Intentos Diarios</h1>
+        
+        <p>Esta página permite reiniciar los intentos diarios del juego Snake para Teresa Elizabeth.</p>
+        
+        <div class="password-container">
+            <p>Por favor, ingresa la contraseña para reiniciar los intentos:</p>
+            <input type="password" id="passwordInput" placeholder="Contraseña">
+        </div>
+        
+        <button id="resetButton">Reiniciar Intentos</button>
+        
+        <div id="result" class="result" style="display: none;"></div>
+        
+        <a href="index.html" class="back-link">Volver al Juego</a>
+    </div>
+    
+    <script>
+        document.getElementById('resetButton').addEventListener('click', function() {
+            const password = document.getElementById('passwordInput').value;
+            const resultElement = document.getElementById('result');
+            
+            // Contraseña simple para protección básica (Teresa2024)
+            if (password === 'Teresa2024') {
+                try {
+                    // Obtener los datos guardados
+                    const savedData = localStorage.getItem('snakeGameData');
+                    
+                    if (savedData) {
+                        // Parsear los datos
+                        const gameData = JSON.parse(savedData);
+                        
+                        // Mantener los premios desbloqueados
+                        const unlockedRewards = gameData.unlockedRewards || [];
+                        
+                        // Crear nuevos datos con el límite reiniciado
+                        const newGameData = {
+                            hasPlayedToday: false,
+                            gameDate: new Date().toLocaleDateString(),
+                            dailyAttemptsUsed: 0, // Reiniciar el contador de intentos
+                            unlockedRewards: unlockedRewards
+                        };
+                        
+                        // Guardar los nuevos datos
+                        localStorage.setItem('snakeGameData', JSON.stringify(newGameData));
+                        
+                        // Mostrar mensaje de éxito
+                        resultElement.textContent = '¡Intentos diarios reiniciados con éxito! Ahora puedes jugar nuevamente.';
+                        resultElement.className = 'result success';
+                        resultElement.style.display = 'block';
+                    } else {
+                        // No hay datos para reiniciar
+                        resultElement.textContent = 'No hay datos de juego para reiniciar. Puedes jugar normalmente.';
+                        resultElement.className = 'result warning';
+                        resultElement.style.display = 'block';
+                    }
+                } catch (e) {
+                    // Error al reiniciar
+                    resultElement.textContent = 'Error al reiniciar los intentos: ' + e.message;
+                    resultElement.className = 'result error';
+                    resultElement.style.display = 'block';
+                }
+            } else {
+                // Contraseña incorrecta
+                resultElement.textContent = 'Contraseña incorrecta. Por favor, intenta nuevamente.';
+                resultElement.className = 'result error';
+                resultElement.style.display = 'block';
+            }
+            
+            // Limpiar el campo de contraseña
+            document.getElementById('passwordInput').value = '';
+        });
+    </script>
+</body>
+</html>
