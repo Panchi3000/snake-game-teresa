@@ -1,0 +1,1129 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Pacifico&display=swap');
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: #ffd6e7; /* Fondo rosa pastel */
+    background-image:
+        url("data:image/svg+xml,%3Csvg width='52' height='26' viewBox='0 0 52 26' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4v2c-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' /%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
+        linear-gradient(135deg, #ffd6e7 0%, #ffb6d9 100%);
+    font-family: 'Poppins', sans-serif;
+    color: #ff66b3; /* Color de texto principal rosa */
+    overflow-x: hidden;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    position: relative; /* Para posicionar las decoraciones laterales */
+}
+
+h1 {
+    color: #ff1493; /* Rosa intenso para el título */
+    text-shadow: 2px 2px 4px rgba(255, 105, 180, 0.6);
+    margin-bottom: 15px;
+    font-family: 'Pacifico', cursive;
+    font-size: 2.5em;
+    letter-spacing: 1px;
+}
+
+.game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 10px auto;
+    border: 3px solid #ff66b3; /* Borde rosa */
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.92); /* Fondo blanco más opaco para mejor contraste */
+    box-shadow: 0 10px 25px rgba(255, 105, 180, 0.4); /* Sombra rosa suave */
+    border-radius: 20px;
+    max-width: 95vw;
+}
+
+.game-header {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 10px;
+    background-color: #fff0f5; /* Lavender blush */
+    padding: 10px 15px;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(255, 182, 193, 0.3);
+}
+
+.score-container, .next-reward {
+    font-size: 1.2em;
+    color: #ff66b3; /* Rosa para la puntuación */
+    font-weight: 600;
+}
+
+#scoreDisplay, #nextRewardDisplay, #currentScoreDisplay, #targetScoreDisplay {
+    font-weight: bold;
+    color: #ff1493; /* Rosa intenso para el número */
+    background: linear-gradient(45deg, #ff66b3, #ff1493);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
+    display: inline-block;
+    transition: transform 0.3s ease, background 0.3s ease;
+}
+
+/* Estilo para el indicador de premio ganado */
+.reward-unlocked {
+    background: linear-gradient(45deg, #ffcc00, #ff9900) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    animation: pulse 1.5s infinite;
+    font-size: 1.1em;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* Animación para el aumento de puntuación */
+@keyframes scoreIncrease {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.5); }
+    100% { transform: scale(1); }
+}
+
+.score-increase {
+    animation: scoreIncrease 0.5s ease;
+}
+
+/* Estilos para la barra de progreso */
+.progress-container {
+    width: 100%;
+    margin-bottom: 15px;
+    background-color: #fff0f5;
+    padding: 10px 15px;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(255, 182, 193, 0.3);
+    text-align: center;
+}
+
+.progress-label {
+    font-size: 1em;
+    color: #ff66b3;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.progress-bar-container {
+    width: 100%;
+    height: 20px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 5px;
+    position: relative;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%; /* Inicialmente 0%, se actualizará con JavaScript */
+    background: linear-gradient(90deg, #ff66b3, #ff1493);
+    border-radius: 10px;
+    transition: width 0.5s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.1),
+        rgba(255, 255, 255, 0.2),
+        rgba(255, 255, 255, 0.1)
+    );
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.progress-info {
+    font-size: 0.9em;
+    color: #ff66b3;
+}
+
+.game-main-container {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 20px;
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+#gameCanvas {
+    border: 5px solid #ff66b3; /* Borde rosa */
+    background-color: #fff0f5; /* Fondo lavender blush */
+    box-shadow: 0 8px 20px rgba(255, 105, 180, 0.3); /* Sombra rosa suave */
+    max-width: calc(100% - 150px); /* Ajustar para dejar espacio para el selector de temas */
+    height: auto;
+    border-radius: 15px;
+}
+
+.game-controls {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+button {
+    padding: 12px 25px;
+    font-size: 1.1em;
+    cursor: pointer;
+    background-color: #ff66b3; /* Fondo rosa */
+    color: white; /* Texto blanco */
+    border: none;
+    border-radius: 50px;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(255, 105, 180, 0.4);
+    position: relative;
+    overflow: hidden;
+    letter-spacing: 1px;
+}
+
+button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: 0.5s;
+}
+
+button:hover {
+    background-color: #ff1493; /* Rosa intenso al pasar el ratón */
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(255, 20, 147, 0.5);
+}
+
+button:hover::before {
+    left: 100%;
+}
+
+/* Estilo específico para el botón de inicio */
+#startButton {
+    background: linear-gradient(45deg, #ff66b3, #ff1493);
+    color: white;
+    font-size: 1.2em;
+    padding: 14px 30px;
+}
+
+#startButton:hover {
+    background: linear-gradient(45deg, #ff1493, #ff66b3);
+    transform: translateY(-3px) scale(1.05);
+}
+
+/* Estilo para el botón de ver premios */
+#viewRewardsButton {
+    background: linear-gradient(45deg, #c466ff, #9933ff);
+    color: white;
+}
+
+#viewRewardsButton:hover {
+    background: linear-gradient(45deg, #9933ff, #c466ff);
+}
+
+/* Estilo para el botón de reinicio del límite diario */
+.reset-button {
+    background: linear-gradient(45deg, #ff9966, #ff6666);
+    color: white;
+    font-size: 0.9em;
+    padding: 10px 15px;
+    margin-top: 10px;
+}
+
+.reset-button:hover {
+    background: linear-gradient(45deg, #ff6666, #ff9966);
+}
+
+/* Estilos para los modales */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 182, 193, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 20px;
+    border: none;
+    box-shadow: 0 15px 30px rgba(255, 105, 180, 0.3);
+    text-align: center;
+    max-width: 80%;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.rewards-list {
+    max-width: 90%;
+}
+
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #ff66b3;
+    background: #fff0f5;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.close-button:hover {
+    color: white;
+    background: #ff1493;
+    transform: rotate(90deg);
+}
+
+/* Clases para animaciones de transición */
+.fade-in {
+    animation: fadeIn 0.5s ease forwards;
+}
+
+.fade-out {
+    animation: fadeOut 0.5s ease forwards;
+}
+
+.slide-in {
+    animation: slideIn 0.5s ease forwards;
+}
+
+.slide-out {
+    animation: slideOut 0.5s ease forwards;
+}
+
+.slide-in-left {
+    animation: slideInLeft 0.5s ease forwards;
+}
+
+.slide-in-right {
+    animation: slideInRight 0.5s ease forwards;
+}
+
+.slide-in-up {
+    animation: slideInUp 0.5s ease forwards;
+}
+
+.slide-in-down {
+    animation: slideInDown 0.5s ease forwards;
+}
+
+.scale-in {
+    animation: scaleIn 0.5s ease forwards;
+}
+
+.scale-out {
+    animation: scaleOut 0.5s ease forwards;
+}
+
+.bounce {
+    animation: bounce 1s ease;
+}
+
+.rotate {
+    animation: rotate 2s linear infinite;
+}
+
+.pulse {
+    animation: pulse 1.5s ease infinite;
+}
+
+.food-pulse {
+    animation: foodPulse 1.5s ease-in-out infinite;
+}
+
+/* Estilos para partículas */
+.food-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.star-particle {
+    position: absolute;
+    font-size: 12px;
+    color: #ffcc00;
+    text-shadow: 0 0 5px rgba(255, 204, 0, 0.8);
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* Animaciones adicionales */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes slideInLeft {
+    from { transform: translateX(-50px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(50px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideInUp {
+    from { transform: translateY(50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideInDown {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideOut {
+    from { transform: translateY(0); opacity: 1; }
+    to { transform: translateY(-20px); opacity: 0; }
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes scaleOut {
+    from { transform: scale(1); opacity: 1; }
+    to { transform: scale(0.9); opacity: 0; }
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-20px); }
+    60% { transform: translateY(-10px); }
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Animación para la comida */
+@keyframes foodPulse {
+    0% { transform: scale(1); filter: brightness(1); }
+    50% { transform: scale(1.15); filter: brightness(1.3); }
+    100% { transform: scale(1); filter: brightness(1); }
+}
+
+/* Animación para partículas */
+@keyframes particleFade {
+    0% { opacity: 1; transform: scale(1) translate(0, 0); }
+    100% { opacity: 0; transform: scale(0.3) translate(var(--tx), var(--ty)); }
+}
+
+.hidden {
+    display: none;
+}
+
+.visible {
+    display: flex;
+}
+
+#rewardDescription {
+    font-size: 1.2em;
+    line-height: 1.6;
+    margin: 20px 0;
+    color: #333;
+    font-family: 'Poppins', sans-serif;
+}
+
+#rewardsList {
+    text-align: left;
+    margin: 20px 0;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding: 0 20px;
+}
+
+.reward-item {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 102, 179, 0.2);
+    transition: all 0.3s ease;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.reward-item:hover {
+    background-color: #fff0f5;
+    transform: translateX(5px);
+}
+
+.reward-points {
+    font-weight: bold;
+    color: #ff1493;
+    font-size: 1.1em;
+    display: inline-block;
+    padding: 3px 10px;
+    background: linear-gradient(45deg, #ff66b3, #ff1493);
+    color: white;
+    border-radius: 20px;
+    margin-bottom: 5px;
+}
+
+.reward-description {
+    margin-top: 8px;
+    color: #333;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Estilos para el modal de recompensa */
+#rewardModal .modal-content {
+    background: linear-gradient(135deg, #fff0f5 0%, #ffcce6 100%);
+    border: 8px solid #ff66b3;
+    border-radius: 25px;
+    box-shadow: 0 10px 30px rgba(255, 20, 147, 0.4);
+    padding: 35px;
+    max-width: 85%;
+    position: relative;
+    overflow: hidden;
+}
+
+#rewardModal h2 {
+    color: #ff1493;
+    font-family: 'Pacifico', cursive;
+    margin-bottom: 10px;
+    font-size: 2.2em;
+    text-shadow: 2px 2px 4px rgba(255, 20, 147, 0.3);
+    position: relative;
+    z-index: 2;
+}
+
+#rewardModal h3 {
+    color: #9400d3;
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 1.6em;
+    position: relative;
+    z-index: 2;
+}
+
+#rewardModal #rewardDescription {
+    background-color: rgba(255, 255, 255, 0.7);
+    padding: 20px;
+    border-radius: 15px;
+    border: 3px solid #ff99cc;
+    font-size: 1.3em;
+    line-height: 1.6;
+    color: #333;
+    margin: 25px 0;
+    position: relative;
+    z-index: 2;
+    box-shadow: 0 5px 15px rgba(255, 105, 180, 0.2);
+}
+
+#rewardModal #closeRewardButton {
+    background: linear-gradient(45deg, #ff66b3, #ff1493);
+    font-size: 1.2em;
+    padding: 12px 30px;
+    border-radius: 50px;
+    box-shadow: 0 5px 15px rgba(255, 20, 147, 0.4);
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 2;
+    margin-top: 10px;
+}
+
+#rewardModal #closeRewardButton:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(255, 20, 147, 0.5);
+    background: linear-gradient(45deg, #ff1493, #ff66b3);
+}
+
+/* Decoraciones para el modal de recompensa */
+#rewardModal .modal-content::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    left: -50px;
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle, rgba(255, 102, 179, 0.2) 0%, rgba(255, 102, 179, 0) 70%);
+    border-radius: 50%;
+    z-index: 1;
+}
+
+#rewardModal .modal-content::after {
+    content: '';
+    position: absolute;
+    bottom: -50px;
+    right: -50px;
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle, rgba(204, 51, 255, 0.2) 0%, rgba(204, 51, 255, 0) 70%);
+    border-radius: 50%;
+    z-index: 1;
+}
+
+/* Añadir estrellas decorativas al modal */
+@keyframes twinkle {
+    0% { opacity: 0.3; }
+    50% { opacity: 1; }
+    100% { opacity: 0.3; }
+}
+
+.reward-star {
+    position: absolute;
+    font-size: 20px;
+    color: #ffcc00;
+    animation: twinkle 2s infinite;
+    z-index: 1;
+}
+
+.reward-star:nth-child(1) { top: 20px; left: 20px; animation-delay: 0s; }
+.reward-star:nth-child(2) { top: 50px; right: 30px; animation-delay: 0.3s; }
+.reward-star:nth-child(3) { bottom: 30px; left: 40px; animation-delay: 0.6s; }
+.reward-star:nth-child(4) { bottom: 50px; right: 50px; animation-delay: 0.9s; }
+.reward-star:nth-child(5) { top: 100px; left: 50%; animation-delay: 1.2s; }
+
+/* Añadir corazones decorativos al modal */
+.reward-heart {
+    position: absolute;
+    font-size: 20px;
+    color: #ff66b3;
+    animation: float 3s infinite ease-in-out;
+    z-index: 1;
+}
+
+@keyframes float {
+    0% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(5deg); }
+    100% { transform: translateY(0) rotate(0deg); }
+}
+
+.reward-heart:nth-child(6) { top: 80px; right: 80px; animation-delay: 0.2s; }
+.reward-heart:nth-child(7) { bottom: 80px; left: 60px; animation-delay: 0.5s; }
+.reward-heart:nth-child(8) { top: 150px; left: 30px; animation-delay: 0.8s; }
+
+/* Estilos para el selector de temas */
+.theme-selector {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 15px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(255, 105, 180, 0.3);
+    text-align: center;
+    border: 2px solid #ff66b3;
+    width: 140px;
+    flex-shrink: 0;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+}
+
+.theme-selector h3 {
+    color: #ff1493;
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.1em;
+}
+
+.theme-options {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: nowrap;
+    flex-grow: 1;
+}
+
+.theme-option {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: all 0.3s ease;
+    padding: 8px;
+    border-radius: 10px;
+    width: auto;
+}
+
+.theme-option:hover {
+    background-color: rgba(255, 240, 245, 0.8);
+    transform: translateY(-3px);
+}
+
+.theme-option.active {
+    background-color: rgba(255, 240, 245, 0.9);
+    box-shadow: 0 3px 10px rgba(255, 105, 180, 0.4);
+    transform: translateY(-3px);
+}
+
+.color-preview {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-bottom: 8px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    border: 2px solid white;
+    transition: all 0.3s ease;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.theme-icon {
+    font-size: 20px;
+    position: absolute;
+    opacity: 0.8;
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.8));
+    transition: all 0.3s ease;
+    transform: scale(0.8);
+}
+
+.theme-option:hover .color-preview {
+    transform: scale(1.1);
+}
+
+.theme-option:hover .theme-icon {
+    transform: scale(1.2);
+    opacity: 1;
+    animation: bounce 1s infinite;
+}
+
+.theme-option.active .color-preview {
+    transform: scale(1.1);
+    border: 2px solid #ff1493;
+    box-shadow: 0 0 15px rgba(255, 20, 147, 0.5);
+}
+
+.theme-option.active .theme-icon {
+    transform: scale(1.2);
+    opacity: 1;
+}
+
+.theme-option span {
+    font-size: 0.9em;
+    color: #333;
+    font-weight: 600;
+}
+
+/* Estilos responsivos */
+@media (max-width: 900px) {
+    .game-main-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    #gameCanvas {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .theme-selector {
+        width: 100%;
+        margin-top: 15px;
+        flex-direction: row;
+        align-items: center;
+        padding: 10px;
+    }
+
+    .theme-selector h3 {
+        margin-bottom: 0;
+        margin-right: 15px;
+        white-space: nowrap;
+    }
+
+    .theme-options {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .game-header {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .modal-content {
+        max-width: 95%;
+        padding: 20px;
+    }
+
+    .theme-option {
+        width: 70px;
+        padding: 8px;
+    }
+
+    .color-preview {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+/* Estilos para dispositivos muy pequeños */
+@media (max-width: 500px) {
+    .theme-selector {
+        flex-direction: column;
+    }
+
+    .theme-selector h3 {
+        margin-bottom: 10px;
+        margin-right: 0;
+    }
+
+    .theme-option {
+        width: 60px;
+        padding: 5px;
+    }
+
+    .color-preview {
+        width: 35px;
+        height: 35px;
+    }
+
+    /* Ocultar decoraciones laterales en pantallas muy pequeñas */
+    .side-decoration {
+        display: none;
+    }
+}
+
+/* Estilos para las decoraciones laterales */
+.side-decoration {
+    position: fixed;
+    top: 0;
+    height: 100vh;
+    width: 150px;
+    pointer-events: none; /* Para que no interfiera con los clics */
+    z-index: 10;
+    overflow: hidden;
+}
+
+.left-decoration {
+    left: 0;
+}
+
+.right-decoration {
+    right: 0;
+}
+
+/* Estilos para mariposas */
+.butterfly {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    transform-origin: center;
+    z-index: 11;
+}
+
+.butterfly-body {
+    position: absolute;
+    width: 8px;
+    height: 20px;
+    background: linear-gradient(to bottom, #ff66b3, #ff99cc);
+    border-radius: 4px;
+    top: 10px;
+    left: 16px;
+    z-index: 12;
+}
+
+.butterfly-wing {
+    position: absolute;
+    width: 20px;
+    height: 25px;
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    top: 5px;
+    z-index: 11;
+    opacity: 0.9;
+    transform-origin: center left;
+}
+
+.butterfly-wing.left {
+    left: 16px;
+    transform: rotate(-10deg) scaleX(-1);
+    animation: flutter-left 0.2s ease-in-out infinite alternate;
+}
+
+.butterfly-wing.right {
+    left: 16px;
+    transform: rotate(10deg);
+    animation: flutter-right 0.2s ease-in-out infinite alternate;
+}
+
+@keyframes flutter-left {
+    0% { transform: rotate(-10deg) scaleX(-1); }
+    100% { transform: rotate(-70deg) scaleX(-1); }
+}
+
+@keyframes flutter-right {
+    0% { transform: rotate(10deg); }
+    100% { transform: rotate(70deg); }
+}
+
+.butterfly-antenna {
+    position: absolute;
+    width: 1px;
+    height: 10px;
+    background-color: #ff66b3;
+    top: 5px;
+    z-index: 13;
+}
+
+.butterfly-antenna.left {
+    left: 18px;
+    transform: rotate(-30deg);
+}
+
+.butterfly-antenna.right {
+    left: 22px;
+    transform: rotate(30deg);
+}
+
+.butterfly-antenna::after {
+    content: '';
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background-color: #ff66b3;
+    top: -1px;
+    left: -1px;
+}
+
+/* Animación de vuelo de mariposa */
+@keyframes butterfly-float {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(10px, -15px) rotate(5deg); }
+    50% { transform: translate(20px, 0) rotate(0deg); }
+    75% { transform: translate(10px, 15px) rotate(-5deg); }
+    100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+/* Estilos para flores */
+.flower {
+    position: absolute;
+    z-index: 11;
+}
+
+.flower-center {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    background-color: #ffcc00;
+    border-radius: 50%;
+    z-index: 12;
+}
+
+.flower-petal {
+    position: absolute;
+    width: 20px;
+    height: 25px;
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    z-index: 11;
+    transform-origin: center bottom;
+}
+
+.flower-stem {
+    position: absolute;
+    width: 3px;
+    height: 50px;
+    background: linear-gradient(to bottom, #66cc66, #99dd99);
+    z-index: 10;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.flower-leaf {
+    position: absolute;
+    width: 20px;
+    height: 10px;
+    background-color: #99dd99;
+    border-radius: 50%;
+    z-index: 10;
+    transform-origin: 0 center;
+}
+
+/* Animación de balanceo de flor */
+@keyframes flower-sway {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(3deg); }
+    50% { transform: rotate(0deg); }
+    75% { transform: rotate(-3deg); }
+    100% { transform: rotate(0deg); }
+}
+
+/* Estilos para estrellas */
+.star {
+    position: absolute;
+    z-index: 11;
+    opacity: 0.8;
+}
+
+/* Animación de parpadeo de estrella */
+@keyframes star-twinkle {
+    0% { opacity: 0.3; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.2); }
+    100% { opacity: 0.3; transform: scale(0.8); }
+}
+
+/* Estilos para arcoíris */
+.rainbow {
+    position: absolute;
+    z-index: 11;
+    opacity: 0.7;
+}
+
+.rainbow-arc {
+    position: absolute;
+    border-radius: 50%;
+    border-style: solid;
+    border-bottom-color: transparent !important;
+    border-left-color: transparent !important;
+    border-right-color: transparent !important;
+}
+
+/* Animación de pulso de arcoíris */
+@keyframes rainbow-pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* Estilos para nubes */
+.cloud {
+    position: absolute;
+    z-index: 11;
+    opacity: 0.8;
+}
+
+.cloud-part {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+}
+
+/* Animación de movimiento de nube */
+@keyframes cloud-float {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(20px); }
+}
+
+/* Estilos para destellos */
+.sparkle {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    background-color: white;
+    border-radius: 50%;
+    z-index: 11;
+    box-shadow: 0 0 5px 2px rgba(255, 255, 255, 0.8);
+}
+
+/* Animación de destello */
+@keyframes sparkle-fade {
+    0% { opacity: 0; transform: scale(0.5); }
+    50% { opacity: 1; transform: scale(1.2); }
+    100% { opacity: 0; transform: scale(0.5); }
+}
+
+/* Estilos para texto decorativo */
+.side-text {
+    position: absolute;
+    font-family: 'Pacifico', cursive;
+    color: #ff1493;
+    text-shadow: 2px 2px 4px rgba(255, 105, 180, 0.6);
+    white-space: nowrap;
+    z-index: 12;
+    transform-origin: center;
+}
+
+/* Animación de ondulación de texto */
+@keyframes text-wave {
+    0% { transform: translateY(0) rotate(0deg); }
+    25% { transform: translateY(-5px) rotate(2deg); }
+    50% { transform: translateY(0) rotate(0deg); }
+    75% { transform: translateY(5px) rotate(-2deg); }
+    100% { transform: translateY(0) rotate(0deg); }
+}
+
+/* Estilos para corazones */
+.heart {
+    position: absolute;
+    z-index: 11;
+    font-size: 20px;
+    color: #ff66b3;
+}
+
+/* Animación de latido de corazón */
+@keyframes heart-beat {
+    0% { transform: scale(1); }
+    25% { transform: scale(1.2); }
+    50% { transform: scale(1); }
+    75% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}

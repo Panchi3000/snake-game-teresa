@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake para Teresa Elizabeth</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="side-decoration left-decoration" id="leftDecoration">
+        <!-- Las decoraciones del lado izquierdo se generarán con JavaScript -->
+    </div>
+
+    <h1>Snake para Teresa Elizabeth</h1>
+    <div class="game-container">
+        <div class="game-header">
+            <div class="score-container">
+                Puntuación: <span id="scoreDisplay">0</span>
+            </div>
+            <div class="next-reward">
+                Próximo premio: <span id="nextRewardDisplay">100 puntos</span>
+            </div>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-label">Progreso hacia el próximo premio:</div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="rewardProgressBar"></div>
+            </div>
+            <div class="progress-info">
+                <span id="currentScoreDisplay">0</span> / <span id="targetScoreDisplay">100</span>
+            </div>
+        </div>
+
+        <div class="game-main-container">
+            <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+            <div class="theme-selector">
+                <h3>Elige el estilo de tu serpiente:</h3>
+                <div class="theme-options">
+                    <div class="theme-option" data-theme="rosa">
+                        <div class="color-preview" style="background: linear-gradient(to right, #ff66b3, #ff1493);">
+                            <span class="theme-icon">❤️</span>
+                        </div>
+                        <span>Rosa</span>
+                    </div>
+                    <div class="theme-option" data-theme="pastel">
+                        <div class="color-preview" style="background: linear-gradient(to right, #ffcce6, #ffb6c1);">
+                            <span class="theme-icon">⚪</span>
+                        </div>
+                        <span>Pastel</span>
+                    </div>
+                    <div class="theme-option" data-theme="arcoiris">
+                        <div class="color-preview" style="background: linear-gradient(to right, #ff9999, #ff66b3, #cc99ff, #99ccff, #99ffcc);">
+                            <span class="theme-icon">🌈</span>
+                        </div>
+                        <span>Arcoíris</span>
+                    </div>
+                    <div class="theme-option" data-theme="unicornio">
+                        <div class="color-preview" style="background: linear-gradient(to right, #ccccff, #cc99ff);">
+                            <span class="theme-icon">🦄</span>
+                        </div>
+                        <span>Unicornio</span>
+                    </div>
+                    <div class="theme-option" data-theme="sirena">
+                        <div class="color-preview" style="background: linear-gradient(to right, #99ffff, #66ccff);">
+                            <span class="theme-icon">🧜‍♀️</span>
+                        </div>
+                        <span>Sirena</span>
+                    </div>
+                    <div class="theme-option" data-theme="purpurina">
+                        <div class="color-preview" style="background: linear-gradient(to right, #ff99ff, #ff66ff);">
+                            <span class="theme-icon">✨</span>
+                        </div>
+                        <span>Purpurina</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-controls">
+            <button id="startButton">Iniciar Juego</button>
+            <button id="restartButton" style="display: none;">Reiniciar Juego</button>
+            <button id="viewRewardsButton">Ver Premios</button>
+        </div>
+
+        <div id="rewardModal" class="modal hidden">
+            <div class="modal-content">
+                <span class="close-button">&times;</span>
+                <!-- Elementos decorativos -->
+                <span class="reward-star">✨</span>
+                <span class="reward-star">✨</span>
+                <span class="reward-star">✨</span>
+                <span class="reward-star">✨</span>
+                <span class="reward-star">✨</span>
+                <span class="reward-heart">❤️</span>
+                <span class="reward-heart">❤️</span>
+                <span class="reward-heart">❤️</span>
+                <!-- Contenido del modal -->
+                <h2>¡FELICIDADES, TERESA ELIZABETH!</h2>
+                <h3>¡HAS GANADO UN PREMIO SÚPER ESPECIAL!</h3>
+                <p id="rewardDescription"></p>
+                <button id="closeRewardButton">¡Genial!</button>
+            </div>
+        </div>
+
+        <div id="rewardsListModal" class="modal hidden">
+            <div class="modal-content rewards-list">
+                <span class="close-button">&times;</span>
+                <h2>Lista de Premios</h2>
+                <div id="rewardsList"></div>
+                <button id="closeRewardsListButton">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="side-decoration right-decoration" id="rightDecoration">
+        <!-- Las decoraciones del lado derecho se generarán con JavaScript -->
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
