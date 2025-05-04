@@ -28,12 +28,8 @@ const POINTS_PER_FOOD = 10; // Puntos ganados por cada comida
 // Detectar si es un dispositivo móvil
 const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-// Elementos de controles táctiles
-const touchControls = document.getElementById('touchControls');
-const upButton = document.getElementById('upButton');
-const downButton = document.getElementById('downButton');
-const leftButton = document.getElementById('leftButton');
-const rightButton = document.getElementById('rightButton');
+// Elemento de indicador de deslizamiento
+const swipeIndicator = document.getElementById('swipeIndicator');
 
 // --- Temas de Color para la Serpiente ---
 const SNAKE_THEMES = {
@@ -3748,9 +3744,9 @@ function resizeCanvas() {
     ROWS = CANVAS_HEIGHT / GRID_SIZE;
     COLS = CANVAS_WIDTH / GRID_SIZE;
 
-    // Mostrar u ocultar los controles táctiles según el dispositivo
-    if (touchControls) {
-        touchControls.style.display = (isMobileDevice || window.innerWidth < 768) ? 'flex' : 'none';
+    // Mostrar u ocultar el indicador de deslizamiento según el dispositivo
+    if (swipeIndicator) {
+        swipeIndicator.style.display = (isMobileDevice || window.innerWidth < 768) ? 'flex' : 'none';
     }
 
     // Redibujar la pantalla actual
@@ -3761,10 +3757,8 @@ function resizeCanvas() {
     }
 }
 
-// Configurar los controles táctiles
+// Configurar los controles táctiles (solo deslizamiento)
 function setupTouchControls() {
-    if (!upButton || !downButton || !leftButton || !rightButton) return;
-
     // Función para manejar los eventos táctiles
     function handleTouchDirection(direction) {
         if (isGameOver) return;
@@ -3773,7 +3767,7 @@ function setupTouchControls() {
         if (changingDirection) return;
         changingDirection = true;
 
-        // Cambiar dirección según el botón presionado
+        // Cambiar dirección según el gesto de deslizamiento
         switch(direction) {
             case 'up':
                 if (dy === 0) { // Solo si no está yendo hacia abajo o arriba
@@ -3800,33 +3794,17 @@ function setupTouchControls() {
                 }
                 break;
         }
+
+        // Ocultar el indicador de deslizamiento después del primer movimiento
+        if (swipeIndicator && swipeIndicator.classList.contains('active')) {
+            swipeIndicator.classList.add('hidden');
+            setTimeout(() => {
+                swipeIndicator.style.display = 'none';
+            }, 500);
+        }
     }
 
-    // Añadir event listeners para los botones táctiles
-    upButton.addEventListener('click', () => handleTouchDirection('up'));
-    downButton.addEventListener('click', () => handleTouchDirection('down'));
-    leftButton.addEventListener('click', () => handleTouchDirection('left'));
-    rightButton.addEventListener('click', () => handleTouchDirection('right'));
-
-    // Añadir event listeners para eventos táctiles (para mejor respuesta)
-    upButton.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        handleTouchDirection('up');
-    });
-    downButton.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        handleTouchDirection('down');
-    });
-    leftButton.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        handleTouchDirection('left');
-    });
-    rightButton.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        handleTouchDirection('right');
-    });
-
-    // Añadir soporte para gestos de deslizamiento (swipe) en el canvas
+    // Configurar soporte para gestos de deslizamiento (swipe) en el canvas
     let touchStartX = 0;
     let touchStartY = 0;
     let touchEndX = 0;
@@ -3842,10 +3820,17 @@ function setupTouchControls() {
         const touch = e.touches[0];
         touchStartX = touch.clientX;
         touchStartY = touch.clientY;
+
+        // Mostrar el indicador de deslizamiento al iniciar el juego
+        if (swipeIndicator && !swipeIndicator.classList.contains('active') && !isGameOver) {
+            swipeIndicator.classList.remove('hidden');
+            swipeIndicator.classList.add('active');
+            swipeIndicator.style.display = 'flex';
+        }
     }
 
     // Función para manejar el fin del toque
-    function handleTouchEnd(e) {
+    function handleTouchEnd() {
         if (isGameOver) return;
 
         // Si no hay toque previo, salir
@@ -3899,6 +3884,21 @@ function setupTouchControls() {
     canvas.addEventListener('touchstart', handleTouchStart, false);
     canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
     canvas.addEventListener('touchend', handleTouchEnd, false);
+
+    // Mostrar el indicador de deslizamiento al iniciar el juego en dispositivos móviles
+    if (swipeIndicator && (isMobileDevice || window.innerWidth < 768)) {
+        swipeIndicator.classList.add('active');
+
+        // Ocultar el indicador después de 5 segundos
+        setTimeout(() => {
+            if (swipeIndicator.classList.contains('active')) {
+                swipeIndicator.classList.add('hidden');
+                setTimeout(() => {
+                    swipeIndicator.style.display = 'none';
+                }, 500);
+            }
+        }, 5000);
+    }
 }
 
 // Cargar datos guardados y mostrar la pantalla de bienvenida al cargar la página

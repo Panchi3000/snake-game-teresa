@@ -193,63 +193,99 @@ h1 {
     object-fit: contain;
 }
 
-/* Estilos para los controles táctiles */
-.touch-controls {
+/* Estilos para el indicador de deslizamiento */
+.swipe-indicator {
     position: absolute;
     bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
-    display: flex;
+    display: none; /* Oculto por defecto, se mostrará en dispositivos táctiles */
     flex-direction: column;
     align-items: center;
-    gap: 10px;
-    width: 180px;
-    opacity: 0.7;
-    transition: opacity 0.3s ease;
+    width: 200px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 15px;
+    padding: 10px;
+    box-shadow: 0 4px 10px rgba(255, 102, 179, 0.4);
     z-index: 100;
-    display: none; /* Oculto por defecto, se mostrará en dispositivos táctiles */
-}
-
-.touch-controls:hover {
     opacity: 0.9;
+    transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-.touch-control-row {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    width: 100%;
+.swipe-indicator.active {
+    opacity: 1;
 }
 
-.touch-button {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background-color: rgba(255, 102, 179, 0.8);
-    border: 2px solid white;
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    padding: 0;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: all 0.2s ease;
+.swipe-indicator.hidden {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+    pointer-events: none;
 }
 
-.touch-button:active {
-    transform: scale(0.9);
-    background-color: rgba(255, 20, 147, 0.9);
+.swipe-text {
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    color: #ff1493;
+    text-align: center;
+    margin-bottom: 8px;
+    font-weight: 600;
 }
 
-.touch-button svg {
-    width: 30px;
-    height: 30px;
+.swipe-animation {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    margin: 0 auto;
 }
 
-.touch-button-spacer {
-    width: 60px;
-    height: 60px;
+.swipe-arrow {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    opacity: 0;
+    animation: pulse 2s infinite;
+}
+
+.swipe-arrow.left {
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-width: 10px 15px 10px 0;
+    border-color: transparent #ff66b3 transparent transparent;
+    animation-delay: 0s;
+}
+
+.swipe-arrow.right {
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-width: 10px 0 10px 15px;
+    border-color: transparent transparent transparent #ff66b3;
+    animation-delay: 0.5s;
+}
+
+.swipe-arrow.up {
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 0 10px 15px 10px;
+    border-color: transparent transparent #ff66b3 transparent;
+    animation-delay: 1s;
+}
+
+.swipe-arrow.down {
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 15px 10px 0 10px;
+    border-color: #ff66b3 transparent transparent transparent;
+    animation-delay: 1.5s;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 1; }
 }
 
 .game-controls {
@@ -907,8 +943,8 @@ button:hover::before {
         height: 40px;
     }
 
-    /* Mostrar controles táctiles en pantallas táctiles */
-    .touch-controls {
+    /* Mostrar indicador de deslizamiento en pantallas táctiles */
+    .swipe-indicator {
         display: flex;
     }
 
