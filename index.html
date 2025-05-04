@@ -33,7 +33,40 @@
         </div>
 
         <div class="game-main-container">
-            <canvas id="gameCanvas" width="800" height="600"></canvas>
+            <div class="canvas-container">
+                <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+                <!-- Controles táctiles para dispositivos móviles -->
+                <div id="touchControls" class="touch-controls">
+                    <div class="touch-control-row">
+                        <button id="upButton" class="touch-button">
+                            <svg viewBox="0 0 24 24" width="100%" height="100%">
+                                <path d="M12 4l-8 8h16z" fill="currentColor"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="touch-control-row">
+                        <button id="leftButton" class="touch-button">
+                            <svg viewBox="0 0 24 24" width="100%" height="100%">
+                                <path d="M4 12l8-8v16z" fill="currentColor"/>
+                            </svg>
+                        </button>
+                        <div class="touch-button-spacer"></div>
+                        <button id="rightButton" class="touch-button">
+                            <svg viewBox="0 0 24 24" width="100%" height="100%">
+                                <path d="M20 12l-8-8v16z" fill="currentColor"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="touch-control-row">
+                        <button id="downButton" class="touch-button">
+                            <svg viewBox="0 0 24 24" width="100%" height="100%">
+                                <path d="M12 20l-8-8h16z" fill="currentColor"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
 
             <div class="theme-selector">
                 <h3>Elige el estilo de tu serpiente:</h3>

@@ -16,14 +16,24 @@ const closeButtons = document.querySelectorAll('.close-button');
 
 // --- Constantes del Juego ---
 const GRID_SIZE = 20; // Tamaño de cada celda de la cuadrícula
-const CANVAS_WIDTH = canvas.width;
-const CANVAS_HEIGHT = canvas.height;
-const ROWS = CANVAS_HEIGHT / GRID_SIZE;
-const COLS = CANVAS_WIDTH / GRID_SIZE;
+let CANVAS_WIDTH = canvas.width;
+let CANVAS_HEIGHT = canvas.height;
+let ROWS = CANVAS_HEIGHT / GRID_SIZE;
+let COLS = CANVAS_WIDTH / GRID_SIZE;
 const FOOD_COLOR = '#9933ff';  // Púrpura para la comida
 const GAME_SPEED = 150; // Milisegundos base entre actualizaciones (menor = más rápido)
 const MAX_SCORE = 10000; // Puntuación máxima posible
 const POINTS_PER_FOOD = 10; // Puntos ganados por cada comida
+
+// Detectar si es un dispositivo móvil
+const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+// Elementos de controles táctiles
+const touchControls = document.getElementById('touchControls');
+const upButton = document.getElementById('upButton');
+const downButton = document.getElementById('downButton');
+const leftButton = document.getElementById('leftButton');
+const rightButton = document.getElementById('rightButton');
 
 // --- Temas de Color para la Serpiente ---
 const SNAKE_THEMES = {
@@ -3702,6 +3712,195 @@ function drawWelcomeSnake() {
     ctx.shadowBlur = 0; // Resetear sombra
 }
 
+// Función para redimensionar el canvas y adaptarlo a diferentes dispositivos
+function resizeCanvas() {
+    const canvasContainer = document.querySelector('.canvas-container');
+    if (!canvasContainer) return;
+
+    // Obtener el ancho disponible para el canvas
+    let availableWidth = canvasContainer.clientWidth;
+
+    // Calcular el nuevo ancho y alto del canvas manteniendo la proporción
+    const aspectRatio = 800 / 600; // Proporción original del canvas
+    let newWidth = Math.min(availableWidth, 800); // Limitar a 800px máximo
+    let newHeight = newWidth / aspectRatio;
+
+    // Asegurarse de que el canvas no sea demasiado alto en dispositivos móviles
+    if (isMobileDevice || window.innerWidth < 768) {
+        const maxHeight = window.innerHeight * 0.6; // 60% de la altura de la ventana
+        if (newHeight > maxHeight) {
+            newHeight = maxHeight;
+            newWidth = newHeight * aspectRatio;
+        }
+    }
+
+    // Redondear a múltiplos del tamaño de la cuadrícula
+    newWidth = Math.floor(newWidth / GRID_SIZE) * GRID_SIZE;
+    newHeight = Math.floor(newHeight / GRID_SIZE) * GRID_SIZE;
+
+    // Actualizar las dimensiones del canvas
+    canvas.width = newWidth;
+    canvas.height = newHeight;
+
+    // Actualizar las variables globales
+    CANVAS_WIDTH = canvas.width;
+    CANVAS_HEIGHT = canvas.height;
+    ROWS = CANVAS_HEIGHT / GRID_SIZE;
+    COLS = CANVAS_WIDTH / GRID_SIZE;
+
+    // Mostrar u ocultar los controles táctiles según el dispositivo
+    if (touchControls) {
+        touchControls.style.display = (isMobileDevice || window.innerWidth < 768) ? 'flex' : 'none';
+    }
+
+    // Redibujar la pantalla actual
+    if (isGameOver) {
+        drawGameOver();
+    } else if (!animationFrameId) {
+        showWelcomeScreen();
+    }
+}
+
+// Configurar los controles táctiles
+function setupTouchControls() {
+    if (!upButton || !downButton || !leftButton || !rightButton) return;
+
+    // Función para manejar los eventos táctiles
+    function handleTouchDirection(direction) {
+        if (isGameOver) return;
+
+        // Prevenir cambios rápidos de dirección
+        if (changingDirection) return;
+        changingDirection = true;
+
+        // Cambiar dirección según el botón presionado
+        switch(direction) {
+            case 'up':
+                if (dy === 0) { // Solo si no está yendo hacia abajo o arriba
+                    dx = 0;
+                    dy = -GRID_SIZE;
+                }
+                break;
+            case 'down':
+                if (dy === 0) { // Solo si no está yendo hacia arriba o abajo
+                    dx = 0;
+                    dy = GRID_SIZE;
+                }
+                break;
+            case 'left':
+                if (dx === 0) { // Solo si no está yendo hacia derecha o izquierda
+                    dx = -GRID_SIZE;
+                    dy = 0;
+                }
+                break;
+            case 'right':
+                if (dx === 0) { // Solo si no está yendo hacia izquierda o derecha
+                    dx = GRID_SIZE;
+                    dy = 0;
+                }
+                break;
+        }
+    }
+
+    // Añadir event listeners para los botones táctiles
+    upButton.addEventListener('click', () => handleTouchDirection('up'));
+    downButton.addEventListener('click', () => handleTouchDirection('down'));
+    leftButton.addEventListener('click', () => handleTouchDirection('left'));
+    rightButton.addEventListener('click', () => handleTouchDirection('right'));
+
+    // Añadir event listeners para eventos táctiles (para mejor respuesta)
+    upButton.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        handleTouchDirection('up');
+    });
+    downButton.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        handleTouchDirection('down');
+    });
+    leftButton.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        handleTouchDirection('left');
+    });
+    rightButton.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        handleTouchDirection('right');
+    });
+
+    // Añadir soporte para gestos de deslizamiento (swipe) en el canvas
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchEndX = 0;
+    let touchEndY = 0;
+
+    // Umbral mínimo de deslizamiento para detectar un swipe (en píxeles)
+    const swipeThreshold = 30;
+
+    // Función para manejar el inicio del toque
+    function handleTouchStart(e) {
+        if (isGameOver) return;
+
+        const touch = e.touches[0];
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+    }
+
+    // Función para manejar el fin del toque
+    function handleTouchEnd(e) {
+        if (isGameOver) return;
+
+        // Si no hay toque previo, salir
+        if (touchStartX === 0 && touchStartY === 0) return;
+
+        // Calcular la distancia y dirección del swipe
+        const deltaX = touchEndX - touchStartX;
+        const deltaY = touchEndY - touchStartY;
+
+        // Determinar si el swipe fue horizontal o vertical
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+            // Swipe horizontal
+            if (Math.abs(deltaX) > swipeThreshold) {
+                if (deltaX > 0) {
+                    handleTouchDirection('right');
+                } else {
+                    handleTouchDirection('left');
+                }
+            }
+        } else {
+            // Swipe vertical
+            if (Math.abs(deltaY) > swipeThreshold) {
+                if (deltaY > 0) {
+                    handleTouchDirection('down');
+                } else {
+                    handleTouchDirection('up');
+                }
+            }
+        }
+
+        // Reiniciar valores
+        touchStartX = 0;
+        touchStartY = 0;
+        touchEndX = 0;
+        touchEndY = 0;
+    }
+
+    // Función para manejar el movimiento del toque
+    function handleTouchMove(e) {
+        if (isGameOver) return;
+
+        // Prevenir el desplazamiento de la página
+        e.preventDefault();
+
+        const touch = e.touches[0];
+        touchEndX = touch.clientX;
+        touchEndY = touch.clientY;
+    }
+
+    // Añadir event listeners para gestos de deslizamiento en el canvas
+    canvas.addEventListener('touchstart', handleTouchStart, false);
+    canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+    canvas.addEventListener('touchend', handleTouchEnd, false);
+}
+
 // Cargar datos guardados y mostrar la pantalla de bienvenida al cargar la página
 window.onload = function() {
     // Intentar cargar datos guardados (si existen)
@@ -3710,8 +3909,17 @@ window.onload = function() {
     // Crear decoraciones laterales en la página
     createSideDecorations();
 
+    // Redimensionar el canvas para adaptarlo al dispositivo
+    resizeCanvas();
+
+    // Configurar los controles táctiles
+    setupTouchControls();
+
     // Mostrar la pantalla de bienvenida
     showWelcomeScreen();
+
+    // Añadir event listener para redimensionar el canvas cuando cambie el tamaño de la ventana
+    window.addEventListener('resize', resizeCanvas);
 };
 
 // Guardar datos del juego

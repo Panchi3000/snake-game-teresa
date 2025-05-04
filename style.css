@@ -172,13 +172,84 @@ h1 {
     margin-bottom: 15px;
 }
 
+.canvas-container {
+    position: relative;
+    width: 100%;
+    max-width: calc(100% - 150px); /* Ajustar para dejar espacio para el selector de temas */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 #gameCanvas {
     border: 5px solid #ff66b3; /* Borde rosa */
     background-color: #fff0f5; /* Fondo lavender blush */
     box-shadow: 0 8px 20px rgba(255, 105, 180, 0.3); /* Sombra rosa suave */
-    max-width: calc(100% - 150px); /* Ajustar para dejar espacio para el selector de temas */
+    width: 100%;
     height: auto;
     border-radius: 15px;
+    display: block;
+    max-height: 80vh; /* Limitar altura para que quepa en la pantalla */
+    object-fit: contain;
+}
+
+/* Estilos para los controles táctiles */
+.touch-controls {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 180px;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+    z-index: 100;
+    display: none; /* Oculto por defecto, se mostrará en dispositivos táctiles */
+}
+
+.touch-controls:hover {
+    opacity: 0.9;
+}
+
+.touch-control-row {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.touch-button {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: rgba(255, 102, 179, 0.8);
+    border: 2px solid white;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    padding: 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+}
+
+.touch-button:active {
+    transform: scale(0.9);
+    background-color: rgba(255, 20, 147, 0.9);
+}
+
+.touch-button svg {
+    width: 30px;
+    height: 30px;
+}
+
+.touch-button-spacer {
+    width: 60px;
+    height: 60px;
 }
 
 .game-controls {
@@ -773,14 +844,24 @@ button:hover::before {
 
 /* Estilos responsivos */
 @media (max-width: 900px) {
+    .game-container {
+        max-width: 98vw;
+        padding: 15px 10px;
+    }
+
     .game-main-container {
         flex-direction: column;
         align-items: center;
     }
 
+    .canvas-container {
+        max-width: 100%;
+    }
+
     #gameCanvas {
         max-width: 100%;
         height: auto;
+        max-height: 70vh;
     }
 
     .theme-selector {
@@ -795,12 +876,14 @@ button:hover::before {
         margin-bottom: 0;
         margin-right: 15px;
         white-space: nowrap;
+        font-size: 0.9em;
     }
 
     .theme-options {
         flex-direction: row;
         flex-wrap: wrap;
         gap: 10px;
+        justify-content: center;
     }
 
     .game-header {
@@ -823,17 +906,51 @@ button:hover::before {
         width: 40px;
         height: 40px;
     }
+
+    /* Mostrar controles táctiles en pantallas táctiles */
+    .touch-controls {
+        display: flex;
+    }
+
+    h1 {
+        font-size: 2em;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
 }
 
 /* Estilos para dispositivos muy pequeños */
 @media (max-width: 500px) {
+    body {
+        padding: 0;
+    }
+
+    .game-container {
+        border-width: 2px;
+        padding: 10px 5px;
+        margin: 5px auto;
+    }
+
+    h1 {
+        font-size: 1.8em;
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+
+    .game-header, .progress-container {
+        padding: 8px;
+        margin-bottom: 8px;
+    }
+
     .theme-selector {
         flex-direction: column;
+        padding: 8px;
     }
 
     .theme-selector h3 {
         margin-bottom: 10px;
         margin-right: 0;
+        font-size: 0.85em;
     }
 
     .theme-option {
@@ -846,9 +963,40 @@ button:hover::before {
         height: 35px;
     }
 
+    .touch-button {
+        width: 50px;
+        height: 50px;
+    }
+
+    .touch-button-spacer {
+        width: 50px;
+        height: 50px;
+    }
+
+    .touch-controls {
+        width: 160px;
+        bottom: 15px;
+    }
+
+    button {
+        padding: 10px 20px;
+        font-size: 1em;
+    }
+
+    #startButton {
+        padding: 12px 25px;
+        font-size: 1.1em;
+    }
+
     /* Ocultar decoraciones laterales en pantallas muy pequeñas */
     .side-decoration {
         display: none;
+    }
+
+    /* Ajustar tamaño del canvas para pantallas pequeñas */
+    #gameCanvas {
+        max-height: 65vh;
+        border-width: 3px;
     }
 }
 
