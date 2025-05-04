@@ -2937,12 +2937,22 @@ function drawGameOver() {
                 CANVAS_WIDTH / 2, noRewardY + 50);
         }
 
-        // Recordatorio de juego diario con estilo juvenil
+        // Recordatorio de intentos restantes con estilo juvenil
         const reminderY = CANVAS_HEIGHT - 60;
         ctx.font = 'italic 18px "Poppins", sans-serif';
         ctx.fillStyle = '#9400d3'; // Morado
-        ctx.fillText('Recuerda que solo puedes jugar una vez al día',
-            CANVAS_WIDTH / 2, reminderY);
+
+        // Calcular intentos restantes
+        const remainingAttempts = MAX_DAILY_ATTEMPTS - dailyAttemptsUsed;
+
+        // Mostrar mensaje según los intentos restantes
+        if (remainingAttempts > 0) {
+            ctx.fillText(`¡Te quedan ${remainingAttempts} ${remainingAttempts === 1 ? 'intento' : 'intentos'} disponibles hoy!`,
+                CANVAS_WIDTH / 2, reminderY);
+        } else {
+            ctx.fillText('Has agotado todos tus intentos de hoy. ¡Vuelve mañana!',
+                CANVAS_WIDTH / 2, reminderY);
+        }
 
         // Mostrar botones de reinicio y ver premios
         if (restartButton) {
