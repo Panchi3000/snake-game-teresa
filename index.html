@@ -115,7 +115,24 @@
             <button id="startButton">Iniciar Juego</button>
             <button id="restartButton" style="display: none;">Reiniciar Juego</button>
             <button id="viewRewardsButton">Ver Premios</button>
+            <a href="reset.html" class="admin-link" title="Solo para administradores">⚙️</a>
         </div>
+
+        <style>
+            .admin-link {
+                position: absolute;
+                bottom: 10px;
+                right: 10px;
+                font-size: 1.2em;
+                color: rgba(255, 102, 179, 0.3);
+                text-decoration: none;
+                transition: color 0.3s ease;
+            }
+
+            .admin-link:hover {
+                color: rgba(255, 102, 179, 0.6);
+            }
+        </style>
 
         <div id="rewardModal" class="modal hidden">
             <div class="modal-content">
