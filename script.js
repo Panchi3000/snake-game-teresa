@@ -459,9 +459,6 @@ function initializeGame() {
         hasPlayedToday = true;
         gameDate = today;
 
-        // Iniciar el bucle de animación
-        animationFrameId = requestAnimationFrame(animationLoop);
-
         console.log("Juego inicializado correctamente");
     } catch (error) {
         console.error("Error al inicializar el juego:", error);
@@ -3306,6 +3303,12 @@ startButton.addEventListener('click', function() {
     startButton.style.display = 'none';
     // Iniciar el juego
     initializeGame();
+
+    // Iniciar el bucle de animación si no está ya en ejecución
+    if (!animationFrameId) {
+        lastFrameTime = performance.now();
+        animationFrameId = requestAnimationFrame(animationLoop);
+    }
 });
 
 // Botón de reinicio
@@ -3314,6 +3317,12 @@ restartButton.addEventListener('click', function() {
     restartButton.style.display = 'none';
     // Iniciar el juego
     initializeGame();
+
+    // Iniciar el bucle de animación si no está ya en ejecución
+    if (!animationFrameId) {
+        lastFrameTime = performance.now();
+        animationFrameId = requestAnimationFrame(animationLoop);
+    }
 });
 
 // Botón para ver premios con animación
