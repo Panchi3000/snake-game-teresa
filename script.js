@@ -3716,27 +3716,51 @@ function resizeCanvas() {
     // Obtener el ancho disponible para el canvas
     let availableWidth = canvasContainer.clientWidth;
 
-    // Calcular el nuevo ancho y alto del canvas manteniendo la proporción
-    const aspectRatio = 800 / 600; // Proporción original del canvas
-    let newWidth = Math.min(availableWidth, 800); // Limitar a 800px máximo
-    let newHeight = newWidth / aspectRatio;
-
-    // Asegurarse de que el canvas no sea demasiado alto en dispositivos móviles
+    // En dispositivos móviles, usar un enfoque diferente para maximizar el espacio vertical
     if (isMobileDevice || window.innerWidth < 768) {
-        const maxHeight = window.innerHeight * 0.6; // 60% de la altura de la ventana
-        if (newHeight > maxHeight) {
-            newHeight = maxHeight;
-            newWidth = newHeight * aspectRatio;
-        }
+        // Calcular el espacio disponible en la pantalla
+        const availableHeight = window.innerHeight * 0.7; // 70% de la altura de la ventana para el juego
+
+        // Determinar el tamaño de la cuadrícula para dispositivos móviles (más pequeño para más espacio)
+        const mobileGridSize = 15; // Tamaño de cuadrícula más pequeño para móviles
+
+        // Calcular cuántas celdas caben en el ancho y alto disponibles
+        const maxCols = Math.floor(availableWidth / mobileGridSize);
+        const maxRows = Math.floor(availableHeight / mobileGridSize);
+
+        // Crear un canvas rectangular vertical para aprovechar mejor la pantalla del móvil
+        // Usar una proporción más vertical (menos ancho, más alto)
+        let newCols = Math.min(maxCols, 30); // Limitar el ancho a 30 celdas como máximo
+        let newRows = Math.min(maxRows, 40); // Permitir hasta 40 celdas de altura
+
+        // Asegurarse de que el canvas tenga al menos un tamaño mínimo
+        newCols = Math.max(newCols, 20);
+        newRows = Math.max(newRows, 25);
+
+        // Calcular las dimensiones finales
+        let newWidth = newCols * mobileGridSize;
+        let newHeight = newRows * mobileGridSize;
+
+        // Actualizar las dimensiones del canvas
+        canvas.width = newWidth;
+        canvas.height = newHeight;
+
+        // Actualizar las variables globales con el nuevo tamaño de cuadrícula
+        GRID_SIZE = mobileGridSize;
+    } else {
+        // Para dispositivos de escritorio, mantener la proporción original
+        const aspectRatio = 800 / 600; // Proporción original del canvas
+        let newWidth = Math.min(availableWidth, 800); // Limitar a 800px máximo
+        let newHeight = newWidth / aspectRatio;
+
+        // Redondear a múltiplos del tamaño de la cuadrícula
+        newWidth = Math.floor(newWidth / GRID_SIZE) * GRID_SIZE;
+        newHeight = Math.floor(newHeight / GRID_SIZE) * GRID_SIZE;
+
+        // Actualizar las dimensiones del canvas
+        canvas.width = newWidth;
+        canvas.height = newHeight;
     }
-
-    // Redondear a múltiplos del tamaño de la cuadrícula
-    newWidth = Math.floor(newWidth / GRID_SIZE) * GRID_SIZE;
-    newHeight = Math.floor(newHeight / GRID_SIZE) * GRID_SIZE;
-
-    // Actualizar las dimensiones del canvas
-    canvas.width = newWidth;
-    canvas.height = newHeight;
 
     // Actualizar las variables globales
     CANVAS_WIDTH = canvas.width;
@@ -3754,6 +3778,19 @@ function resizeCanvas() {
         drawGameOver();
     } else if (!animationFrameId) {
         showWelcomeScreen();
+    }
+
+    // Reposicionar la comida si está fuera de los límites
+    if (food && (food.x >= CANVAS_WIDTH || food.y >= CANVAS_HEIGHT)) {
+        createFood();
+    }
+
+    // Ajustar la posición de la serpiente si está fuera de los límites
+    if (snake && snake.length > 0) {
+        for (let i = 0; i < snake.length; i++) {
+            if (snake[i].x >= CANVAS_WIDTH) snake[i].x = CANVAS_WIDTH - GRID_SIZE;
+            if (snake[i].y >= CANVAS_HEIGHT) snake[i].y = CANVAS_HEIGHT - GRID_SIZE;
+        }
     }
 }
 
