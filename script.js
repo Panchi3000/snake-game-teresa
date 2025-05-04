@@ -33,7 +33,9 @@ const SNAKE_THEMES = {
         bodyColor: '#ff66b3', // Rosa para el cuerpo
         patternColor: '#ffb6c1', // Color para patrones decorativos
         eyeColor: '#ffffff', // Color de los ojos
-        style: 'hearts' // Estilo decorativo
+        style: 'flower', // Estilo decorativo mejorado
+        shape: 'caterpillar', // Forma de oruga
+        animation: 'bounce' // Animación de rebote
     },
     pastel: {
         name: 'Pastel',
@@ -41,7 +43,9 @@ const SNAKE_THEMES = {
         bodyColor: '#ffcce6', // Rosa pastel claro para el cuerpo
         patternColor: '#ffffff', // Blanco para patrones
         eyeColor: '#ffffff', // Color de los ojos
-        style: 'dots' // Estilo decorativo
+        style: 'butterfly', // Estilo decorativo mejorado
+        shape: 'caterpillar', // Forma de oruga
+        animation: 'wiggle' // Animación de movimiento ondulante
     },
     arcoiris: {
         name: 'Arcoíris',
@@ -49,7 +53,9 @@ const SNAKE_THEMES = {
         bodyColor: '#ff9999', // Base para el cuerpo (se aplicará gradiente)
         patternColor: '#ffffff', // Blanco para patrones
         eyeColor: '#ffffff', // Color de los ojos
-        style: 'rainbow' // Estilo decorativo
+        style: 'rainbow', // Estilo decorativo (mantenido como está)
+        shape: 'caterpillar', // Forma de oruga
+        animation: 'pulse' // Animación de pulso
     },
     unicornio: {
         name: 'Unicornio',
@@ -57,7 +63,9 @@ const SNAKE_THEMES = {
         bodyColor: '#ccccff', // Lila claro para el cuerpo
         patternColor: '#ffccff', // Rosa claro para patrones
         eyeColor: '#ffffff', // Color de los ojos
-        style: 'stars' // Estilo decorativo
+        style: 'magical', // Estilo decorativo mejorado
+        shape: 'caterpillar', // Forma de oruga
+        animation: 'sparkle' // Animación de destellos
     },
     sirena: {
         name: 'Sirena',
@@ -65,7 +73,9 @@ const SNAKE_THEMES = {
         bodyColor: '#99ffff', // Turquesa claro para el cuerpo
         patternColor: '#ccffff', // Celeste muy claro para patrones
         eyeColor: '#ffffff', // Color de los ojos
-        style: 'scales' // Estilo decorativo
+        style: 'mermaid', // Estilo decorativo mejorado
+        shape: 'caterpillar', // Forma de oruga
+        animation: 'wave' // Animación de onda
     },
     purpurina: {
         name: 'Purpurina',
@@ -73,7 +83,9 @@ const SNAKE_THEMES = {
         bodyColor: '#ff99ff', // Rosa claro para el cuerpo
         patternColor: '#ffccff', // Rosa muy claro para patrones
         eyeColor: '#ffffff', // Color de los ojos
-        style: 'glitter' // Estilo decorativo
+        style: 'glitter', // Estilo decorativo (mantenido como está)
+        shape: 'caterpillar', // Forma de oruga
+        animation: 'glimmer' // Animación de brillo
     }
 };
 
@@ -1032,13 +1044,69 @@ function drawSnake() {
         // Obtener el tiempo actual para animaciones
         const time = Date.now() * 0.001;
 
+        // Aplicar animaciones según el tema actual
+        let animationOffsets = [];
+
+        // Calcular offsets de animación para cada segmento
+        snake.forEach((segment, index) => {
+            let offsetX = 0;
+            let offsetY = 0;
+
+            // Aplicar diferentes animaciones según el tema
+            switch(currentSnakeTheme.animation) {
+                case 'bounce':
+                    // Efecto de rebote suave, más pronunciado en la cabeza
+                    offsetY = Math.sin(time * 3 + index * 0.3) * (index === 0 ? 3 : 2);
+                    break;
+
+                case 'wiggle':
+                    // Movimiento ondulante lateral
+                    offsetX = Math.sin(time * 2 + index * 0.5) * (index === 0 ? 2 : 3);
+                    break;
+
+                case 'pulse':
+                    // El pulso se maneja en el tamaño, no en el offset
+                    break;
+
+                case 'sparkle':
+                    // Pequeño movimiento aleatorio para efecto de destello
+                    offsetX = Math.sin(time * 4 + index) * (index === 0 ? 1 : 1.5);
+                    offsetY = Math.cos(time * 3 + index) * (index === 0 ? 1 : 1.5);
+                    break;
+
+                case 'wave':
+                    // Movimiento ondulante más pronunciado
+                    offsetX = Math.sin(time * 2 + index * 0.4) * 3;
+                    offsetY = Math.cos(time * 1.5 + index * 0.4) * 2;
+                    break;
+
+                case 'glimmer':
+                    // Movimiento sutil para el efecto de brillo
+                    offsetX = Math.sin(time * 3 + index * 0.2) * 1.5;
+                    offsetY = Math.cos(time * 2.5 + index * 0.2) * 1.5;
+                    break;
+            }
+
+            animationOffsets.push({ x: offsetX, y: offsetY });
+        });
+
         // Dibujar cada segmento de la serpiente
         snake.forEach((segment, index) => {
             // Determinar si es la cabeza o el cuerpo
             const isHead = index === 0;
 
-            // Calcular el tamaño del segmento (ligeramente más pequeño para el efecto de borde)
-            const segmentSize = GRID_SIZE - 2;
+            // Aplicar offsets de animación
+            const animatedX = segment.x + animationOffsets[index].x;
+            const animatedY = segment.y + animationOffsets[index].y;
+
+            // Calcular el tamaño del segmento con posible efecto de pulso
+            let segmentSize = GRID_SIZE - 2;
+
+            // Efecto de pulso para la animación 'pulse'
+            if (currentSnakeTheme.animation === 'pulse') {
+                const pulseFactor = 1 + Math.sin(time * 3 + index * 0.2) * 0.1; // Factor entre 0.9 y 1.1
+                segmentSize *= pulseFactor;
+            }
 
             // Establecer colores según el tema actual
             let fillColor, strokeColor;
@@ -1069,32 +1137,92 @@ function drawSnake() {
                 }
             }
 
-            // Dibujar el segmento con borde redondeado
-            ctx.fillStyle = fillColor;
-            ctx.strokeStyle = strokeColor;
-            ctx.lineWidth = 2;
+            // Dibujar el segmento según la forma seleccionada
+            if (currentSnakeTheme.shape === 'caterpillar') {
+                // Forma de oruga: círculos para el cuerpo, forma especial para la cabeza
+                ctx.fillStyle = fillColor;
+                ctx.strokeStyle = strokeColor;
+                ctx.lineWidth = 2;
 
-            // Dibujar un rectángulo redondeado
-            ctx.beginPath();
-            ctx.roundRect(
-                segment.x + 1,
-                segment.y + 1,
-                segmentSize,
-                segmentSize,
-                isHead ? 8 : 4 // Radio de borde más grande para la cabeza
-            );
-            ctx.fill();
-            ctx.stroke();
+                if (isHead) {
+                    // Cabeza más grande y ovalada
+                    ctx.save();
+                    ctx.translate(animatedX + GRID_SIZE/2, animatedY + GRID_SIZE/2);
 
-            // Añadir decoraciones según el estilo del tema
-            if (!isHead) {
-                // Aplicar decoraciones solo a los segmentos del cuerpo
-                drawSnakeSegmentDecoration(segment, index, segmentSize, time);
-            }
+                    // Rotar según la dirección
+                    let rotation = 0;
+                    if (dx > 0) rotation = 0; // Derecha
+                    else if (dx < 0) rotation = Math.PI; // Izquierda
+                    else if (dy > 0) rotation = Math.PI/2; // Abajo
+                    else rotation = -Math.PI/2; // Arriba
 
-            // Si es la cabeza, añadir detalles especiales
-            if (isHead) {
-                drawSnakeHead(segment, segmentSize, time);
+                    ctx.rotate(rotation);
+
+                    // Dibujar cabeza ovalada
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, segmentSize/1.5, segmentSize/1.8, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.restore();
+
+                    // Dibujar detalles de la cabeza
+                    drawSnakeHead(segment, segmentSize, time, animationOffsets[index]);
+                } else {
+                    // Cuerpo: círculos con tamaño variable según la posición
+                    const sizeVariation = 1 - Math.sin(index * 0.5) * 0.1; // Variación sutil
+                    const bodySize = segmentSize * sizeVariation;
+
+                    ctx.beginPath();
+                    ctx.arc(
+                        animatedX + GRID_SIZE/2,
+                        animatedY + GRID_SIZE/2,
+                        bodySize/2,
+                        0,
+                        Math.PI * 2
+                    );
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // Añadir decoraciones según el estilo del tema
+                    drawSnakeSegmentDecoration(
+                        {x: animatedX, y: animatedY},
+                        index,
+                        bodySize,
+                        time
+                    );
+                }
+            } else {
+                // Forma original (rectángulos redondeados) como respaldo
+                ctx.fillStyle = fillColor;
+                ctx.strokeStyle = strokeColor;
+                ctx.lineWidth = 2;
+
+                ctx.beginPath();
+                ctx.roundRect(
+                    animatedX + 1,
+                    animatedY + 1,
+                    segmentSize,
+                    segmentSize,
+                    isHead ? 8 : 4
+                );
+                ctx.fill();
+                ctx.stroke();
+
+                // Añadir decoraciones según el estilo del tema
+                if (!isHead) {
+                    drawSnakeSegmentDecoration(
+                        {x: animatedX, y: animatedY},
+                        index,
+                        segmentSize,
+                        time
+                    );
+                }
+
+                // Si es la cabeza, añadir detalles especiales
+                if (isHead) {
+                    drawSnakeHead(segment, segmentSize, time, animationOffsets[index]);
+                }
             }
         });
     } catch (error) {
@@ -1109,52 +1237,97 @@ function drawSnake() {
 }
 
 // Función para dibujar la cabeza de la serpiente con detalles
-function drawSnakeHead(segment, segmentSize, time) {
-    // Determinar la dirección de la cabeza
-    let eyeOffsetX1, eyeOffsetY1, eyeOffsetX2, eyeOffsetY2;
-    let mouthX, mouthY, mouthWidth, mouthHeight;
+function drawSnakeHead(segment, segmentSize, time, offset = {x: 0, y: 0}) {
+    // Aplicar offset de animación si se proporciona
+    const x = segment.x + (offset ? offset.x : 0);
+    const y = segment.y + (offset ? offset.y : 0);
+
+    // Centro de la cabeza
+    const centerX = x + GRID_SIZE/2;
+    const centerY = y + GRID_SIZE/2;
+
+    // Determinar la dirección de la cabeza para posicionar los ojos y la boca
+    let eyeAngle1, eyeAngle2, mouthAngle;
+    let eyeDistance = segmentSize/3;
 
     if (dx > 0) { // Derecha
-        eyeOffsetX1 = segmentSize - 6;
-        eyeOffsetY1 = 6;
-        eyeOffsetX2 = segmentSize - 6;
-        eyeOffsetY2 = segmentSize - 6;
-        mouthX = segmentSize - 2;
-        mouthY = segmentSize / 2 - 2;
-        mouthWidth = 2;
-        mouthHeight = 4;
+        eyeAngle1 = -Math.PI/4; // Arriba derecha
+        eyeAngle2 = Math.PI/4;  // Abajo derecha
+        mouthAngle = 0;         // Derecha
     } else if (dx < 0) { // Izquierda
-        eyeOffsetX1 = 6;
-        eyeOffsetY1 = 6;
-        eyeOffsetX2 = 6;
-        eyeOffsetY2 = segmentSize - 6;
-        mouthX = 0;
-        mouthY = segmentSize / 2 - 2;
-        mouthWidth = 2;
-        mouthHeight = 4;
+        eyeAngle1 = 3*Math.PI/4;  // Arriba izquierda
+        eyeAngle2 = -3*Math.PI/4; // Abajo izquierda
+        mouthAngle = Math.PI;     // Izquierda
     } else if (dy > 0) { // Abajo
-        eyeOffsetX1 = 6;
-        eyeOffsetY1 = segmentSize - 6;
-        eyeOffsetX2 = segmentSize - 6;
-        eyeOffsetY2 = segmentSize - 6;
-        mouthX = segmentSize / 2 - 2;
-        mouthY = segmentSize - 2;
-        mouthWidth = 4;
-        mouthHeight = 2;
+        eyeAngle1 = Math.PI/4;     // Abajo derecha
+        eyeAngle2 = 3*Math.PI/4;   // Abajo izquierda
+        mouthAngle = Math.PI/2;    // Abajo
     } else { // Arriba
-        eyeOffsetX1 = 6;
-        eyeOffsetY1 = 6;
-        eyeOffsetX2 = segmentSize - 6;
-        eyeOffsetY2 = 6;
-        mouthX = segmentSize / 2 - 2;
-        mouthY = 0;
-        mouthWidth = 4;
-        mouthHeight = 2;
+        eyeAngle1 = -Math.PI/4;    // Arriba derecha
+        eyeAngle2 = -3*Math.PI/4;  // Arriba izquierda
+        mouthAngle = -Math.PI/2;   // Arriba
+    }
+
+    // Calcular posiciones de los ojos
+    const eyeX1 = centerX + Math.cos(eyeAngle1) * eyeDistance;
+    const eyeY1 = centerY + Math.sin(eyeAngle1) * eyeDistance;
+    const eyeX2 = centerX + Math.cos(eyeAngle2) * eyeDistance;
+    const eyeY2 = centerY + Math.sin(eyeAngle2) * eyeDistance;
+
+    // Calcular posición de la boca
+    const mouthDistance = segmentSize/2;
+    const mouthX = centerX + Math.cos(mouthAngle) * mouthDistance;
+    const mouthY = centerY + Math.sin(mouthAngle) * mouthDistance;
+
+    // Dibujar antenas (para la forma de oruga)
+    if (currentSnakeTheme.shape === 'caterpillar') {
+        ctx.strokeStyle = currentSnakeTheme.patternColor;
+        ctx.lineWidth = 1.5;
+
+        // Ángulo base para las antenas según la dirección
+        let antennaBaseAngle;
+        if (dx > 0) antennaBaseAngle = -Math.PI/2; // Derecha -> antenas hacia arriba
+        else if (dx < 0) antennaBaseAngle = Math.PI/2; // Izquierda -> antenas hacia arriba
+        else if (dy > 0) antennaBaseAngle = 0; // Abajo -> antenas hacia los lados
+        else antennaBaseAngle = Math.PI; // Arriba -> antenas hacia los lados
+
+        // Antena 1
+        const antenna1Angle = antennaBaseAngle - Math.PI/6;
+        const antenna1Length = segmentSize * 0.8;
+        const antenna1EndX = centerX + Math.cos(antenna1Angle) * antenna1Length;
+        const antenna1EndY = centerY + Math.sin(antenna1Angle) * antenna1Length;
+
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(antenna1EndX, antenna1EndY);
+        ctx.stroke();
+
+        // Pequeña bola al final de la antena 1
+        ctx.fillStyle = currentSnakeTheme.patternColor;
+        ctx.beginPath();
+        ctx.arc(antenna1EndX, antenna1EndY, 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Antena 2
+        const antenna2Angle = antennaBaseAngle + Math.PI/6;
+        const antenna2Length = segmentSize * 0.8;
+        const antenna2EndX = centerX + Math.cos(antenna2Angle) * antenna2Length;
+        const antenna2EndY = centerY + Math.sin(antenna2Angle) * antenna2Length;
+
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(antenna2EndX, antenna2EndY);
+        ctx.stroke();
+
+        // Pequeña bola al final de la antena 2
+        ctx.beginPath();
+        ctx.arc(antenna2EndX, antenna2EndY, 2, 0, Math.PI * 2);
+        ctx.fill();
     }
 
     // Dibujar ojos con brillo
-    const eyeSize = 3;
-    const pupilSize = 1.5;
+    const eyeSize = 4; // Ojos más grandes
+    const pupilSize = 2;
     const blinkFactor = Math.sin(time * 3) > 0.95 ? 0.2 : 1; // Parpadeo ocasional
 
     // Fondo del ojo (blanco)
@@ -1163,8 +1336,8 @@ function drawSnakeHead(segment, segmentSize, time) {
     // Ojo 1
     ctx.beginPath();
     ctx.ellipse(
-        segment.x + eyeOffsetX1,
-        segment.y + eyeOffsetY1,
+        eyeX1,
+        eyeY1,
         eyeSize,
         eyeSize * blinkFactor,
         0,
@@ -1176,8 +1349,8 @@ function drawSnakeHead(segment, segmentSize, time) {
     // Ojo 2
     ctx.beginPath();
     ctx.ellipse(
-        segment.x + eyeOffsetX2,
-        segment.y + eyeOffsetY2,
+        eyeX2,
+        eyeY2,
         eyeSize,
         eyeSize * blinkFactor,
         0,
@@ -1191,13 +1364,13 @@ function drawSnakeHead(segment, segmentSize, time) {
         ctx.fillStyle = '#000000';
 
         // Pupila 1 con movimiento suave
-        const pupilOffsetX = Math.sin(time) * 0.8;
-        const pupilOffsetY = Math.cos(time * 1.2) * 0.8;
+        const pupilOffsetX = Math.sin(time) * 1;
+        const pupilOffsetY = Math.cos(time * 1.2) * 1;
 
         ctx.beginPath();
         ctx.arc(
-            segment.x + eyeOffsetX1 + pupilOffsetX,
-            segment.y + eyeOffsetY1 + pupilOffsetY,
+            eyeX1 + pupilOffsetX,
+            eyeY1 + pupilOffsetY,
             pupilSize,
             0,
             Math.PI * 2
@@ -1207,8 +1380,8 @@ function drawSnakeHead(segment, segmentSize, time) {
         // Pupila 2 con el mismo movimiento
         ctx.beginPath();
         ctx.arc(
-            segment.x + eyeOffsetX2 + pupilOffsetX,
-            segment.y + eyeOffsetY2 + pupilOffsetY,
+            eyeX2 + pupilOffsetX,
+            eyeY2 + pupilOffsetY,
             pupilSize,
             0,
             Math.PI * 2
@@ -1222,8 +1395,8 @@ function drawSnakeHead(segment, segmentSize, time) {
         // Brillo ojo 1
         ctx.beginPath();
         ctx.arc(
-            segment.x + eyeOffsetX1 - 0.8,
-            segment.y + eyeOffsetY1 - 0.8,
+            eyeX1 - 1,
+            eyeY1 - 1,
             pupilSize * 0.6,
             0,
             Math.PI * 2
@@ -1233,8 +1406,8 @@ function drawSnakeHead(segment, segmentSize, time) {
         // Brillo ojo 2
         ctx.beginPath();
         ctx.arc(
-            segment.x + eyeOffsetX2 - 0.8,
-            segment.y + eyeOffsetY2 - 0.8,
+            eyeX2 - 1,
+            eyeY2 - 1,
             pupilSize * 0.6,
             0,
             Math.PI * 2
@@ -1244,34 +1417,105 @@ function drawSnakeHead(segment, segmentSize, time) {
         ctx.globalAlpha = 1;
     }
 
-    // Dibujar boca (pequeña sonrisa)
-    ctx.fillStyle = '#ff3366'; // Color rosa para la boca
-    ctx.beginPath();
-    ctx.roundRect(
-        segment.x + mouthX,
-        segment.y + mouthY,
-        mouthWidth,
-        mouthHeight,
-        1
-    );
-    ctx.fill();
+    // Dibujar boca según la forma
+    if (currentSnakeTheme.shape === 'caterpillar') {
+        // Para la oruga, dibujar una sonrisa curva
+        ctx.strokeStyle = '#ff3366'; // Color rosa para la boca
+        ctx.lineWidth = 2;
+
+        // Ángulo para la sonrisa según la dirección
+        let smileStartAngle, smileEndAngle;
+
+        if (dx > 0) { // Derecha
+            smileStartAngle = -Math.PI/4;
+            smileEndAngle = Math.PI/4;
+        } else if (dx < 0) { // Izquierda
+            smileStartAngle = 3*Math.PI/4;
+            smileEndAngle = 5*Math.PI/4;
+        } else if (dy > 0) { // Abajo
+            smileStartAngle = Math.PI/4;
+            smileEndAngle = 3*Math.PI/4;
+        } else { // Arriba
+            smileStartAngle = -3*Math.PI/4;
+            smileEndAngle = -Math.PI/4;
+        }
+
+        // Dibujar sonrisa como un arco
+        ctx.beginPath();
+        ctx.arc(
+            centerX + Math.cos(mouthAngle) * (segmentSize/4),
+            centerY + Math.sin(mouthAngle) * (segmentSize/4),
+            segmentSize/4,
+            smileStartAngle,
+            smileEndAngle
+        );
+        ctx.stroke();
+    } else {
+        // Boca rectangular para la forma original
+        ctx.fillStyle = '#ff3366'; // Color rosa para la boca
+
+        // Tamaño y posición según la dirección
+        let mouthWidth, mouthHeight;
+        if (dx !== 0) { // Horizontal
+            mouthWidth = 2;
+            mouthHeight = 4;
+        } else { // Vertical
+            mouthWidth = 4;
+            mouthHeight = 2;
+        }
+
+        ctx.beginPath();
+        ctx.roundRect(
+            mouthX - mouthWidth/2,
+            mouthY - mouthHeight/2,
+            mouthWidth,
+            mouthHeight,
+            1
+        );
+        ctx.fill();
+    }
 
     // Añadir detalles según el tema
-    if (currentSnakeTheme.style === 'unicornio') {
-        // Dibujar un pequeño cuerno para el tema unicornio
+    if (currentSnakeTheme.style === 'magical') {
+        // Dibujar un pequeño cuerno para el tema unicornio mejorado
         ctx.save();
-        ctx.translate(segment.x + segmentSize / 2, segment.y);
+
+        // Posición del cuerno según la dirección
+        let hornX, hornY, hornAngle;
+
+        if (dx > 0) { // Derecha
+            hornX = centerX;
+            hornY = centerY - segmentSize/2;
+            hornAngle = -Math.PI/2;
+        } else if (dx < 0) { // Izquierda
+            hornX = centerX;
+            hornY = centerY - segmentSize/2;
+            hornAngle = -Math.PI/2;
+        } else if (dy > 0) { // Abajo
+            hornX = centerX + segmentSize/2;
+            hornY = centerY;
+            hornAngle = 0;
+        } else { // Arriba
+            hornX = centerX - segmentSize/2;
+            hornY = centerY;
+            hornAngle = Math.PI;
+        }
+
+        ctx.translate(hornX, hornY);
+        ctx.rotate(hornAngle);
 
         // Gradiente para el cuerno
-        const hornGradient = ctx.createLinearGradient(0, 0, 0, -8);
+        const hornGradient = ctx.createLinearGradient(0, 0, 0, -10);
         hornGradient.addColorStop(0, '#ffccff');
-        hornGradient.addColorStop(1, '#ff66ff');
+        hornGradient.addColorStop(0.5, '#ff66ff');
+        hornGradient.addColorStop(1, '#cc99ff');
 
+        // Dibujar cuerno más elaborado
         ctx.fillStyle = hornGradient;
         ctx.beginPath();
-        ctx.moveTo(-2, 0);
-        ctx.lineTo(0, -8);
-        ctx.lineTo(2, 0);
+        ctx.moveTo(-3, 0);
+        ctx.lineTo(0, -12);
+        ctx.lineTo(3, 0);
         ctx.closePath();
         ctx.fill();
 
@@ -1280,10 +1524,72 @@ function drawSnakeHead(segment, segmentSize, time) {
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(0, 0);
-        ctx.lineTo(0, -7);
+        ctx.lineTo(0, -10);
         ctx.stroke();
 
+        // Destellos alrededor del cuerno
+        ctx.fillStyle = '#ffffff';
+        for (let i = 0; i < 3; i++) {
+            const starAngle = time * 2 + (i * Math.PI * 2 / 3);
+            const starX = Math.cos(starAngle) * 8;
+            const starY = Math.sin(starAngle) * 8 - 6;
+            const starSize = 1 + Math.sin(time * 3 + i) * 0.5;
+
+            ctx.globalAlpha = 0.6 + Math.sin(time * 4 + i) * 0.4;
+            ctx.beginPath();
+            ctx.arc(starX, starY, starSize, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+
         ctx.restore();
+    }
+
+    // Añadir mejillas rosadas para la forma de oruga
+    if (currentSnakeTheme.shape === 'caterpillar') {
+        ctx.fillStyle = 'rgba(255, 150, 150, 0.6)';
+
+        // Posición de las mejillas según la dirección
+        let cheekAngle1, cheekAngle2;
+
+        if (dx > 0) { // Derecha
+            cheekAngle1 = -Math.PI/2.5;
+            cheekAngle2 = Math.PI/2.5;
+        } else if (dx < 0) { // Izquierda
+            cheekAngle1 = Math.PI - Math.PI/2.5;
+            cheekAngle2 = Math.PI + Math.PI/2.5;
+        } else if (dy > 0) { // Abajo
+            cheekAngle1 = 0 - Math.PI/2.5;
+            cheekAngle2 = Math.PI + Math.PI/2.5;
+        } else { // Arriba
+            cheekAngle1 = 0 + Math.PI/2.5;
+            cheekAngle2 = Math.PI - Math.PI/2.5;
+        }
+
+        const cheekDistance = segmentSize/2.2;
+        const cheekSize = 3;
+
+        // Mejilla 1
+        ctx.beginPath();
+        ctx.arc(
+            centerX + Math.cos(cheekAngle1) * cheekDistance,
+            centerY + Math.sin(cheekAngle1) * cheekDistance,
+            cheekSize,
+            0,
+            Math.PI * 2
+        );
+        ctx.fill();
+
+        // Mejilla 2
+        ctx.beginPath();
+        ctx.arc(
+            centerX + Math.cos(cheekAngle2) * cheekDistance,
+            centerY + Math.sin(cheekAngle2) * cheekDistance,
+            cheekSize,
+            0,
+            Math.PI * 2
+        );
+        ctx.fill();
     }
 }
 
@@ -1294,55 +1600,176 @@ function drawSnakeSegmentDecoration(segment, index, segmentSize, time) {
 
     // Aplicar decoraciones según el estilo del tema
     switch(currentSnakeTheme.style) {
-        case 'hearts':
-            // Dibujar pequeños corazones en segmentos alternos
+        case 'flower':
+            // Dibujar pequeñas flores en segmentos alternos
             if (index % 3 === 1) {
-                ctx.fillStyle = currentSnakeTheme.patternColor;
                 ctx.save();
                 ctx.translate(x, y);
-                ctx.scale(0.4, 0.4);
+                ctx.rotate(time * 0.5 + index * 0.1); // Rotación suave
 
-                // Dibujar corazón
+                // Pétalos de la flor
+                const petalCount = 5;
+                const petalSize = segmentSize * 0.3;
+
+                for (let i = 0; i < petalCount; i++) {
+                    const angle = (i / petalCount) * Math.PI * 2;
+                    const petalX = Math.cos(angle) * (segmentSize * 0.25);
+                    const petalY = Math.sin(angle) * (segmentSize * 0.25);
+
+                    // Color del pétalo con variación
+                    const hue = (index * 30 + i * 20 + time * 10) % 360;
+                    ctx.fillStyle = `hsl(${hue}, 80%, 80%)`;
+
+                    // Dibujar pétalo
+                    ctx.beginPath();
+                    ctx.ellipse(
+                        petalX,
+                        petalY,
+                        petalSize * 0.4,
+                        petalSize * 0.6,
+                        angle,
+                        0,
+                        Math.PI * 2
+                    );
+                    ctx.fill();
+                }
+
+                // Centro de la flor
+                ctx.fillStyle = '#ffff66'; // Amarillo para el centro
                 ctx.beginPath();
-                ctx.moveTo(0, 2);
-                ctx.bezierCurveTo(-5, -5, -10, 0, 0, 8);
-                ctx.bezierCurveTo(10, 0, 5, -5, 0, 2);
+                ctx.arc(0, 0, segmentSize * 0.15, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Detalles en el centro
+                ctx.fillStyle = '#ff9933'; // Naranja para los detalles
+                for (let i = 0; i < 6; i++) {
+                    const angle = (i / 6) * Math.PI * 2;
+                    const dotX = Math.cos(angle) * (segmentSize * 0.08);
+                    const dotY = Math.sin(angle) * (segmentSize * 0.08);
+
+                    ctx.beginPath();
+                    ctx.arc(dotX, dotY, segmentSize * 0.03, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                ctx.restore();
+            }
+            break;
+
+        case 'butterfly':
+            // Dibujar pequeñas mariposas en segmentos específicos
+            if (index % 4 === 2) {
+                ctx.save();
+                ctx.translate(x, y);
+
+                // Rotación suave con oscilación
+                const rotationAngle = Math.sin(time + index * 0.2) * 0.3;
+                ctx.rotate(rotationAngle);
+
+                // Factor de aleteo
+                const wingFlapFactor = Math.sin(time * 5 + index) * 0.5 + 0.5; // Entre 0 y 1
+
+                // Colores para las alas
+                const wingGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, segmentSize * 0.4);
+                wingGradient.addColorStop(0, currentSnakeTheme.patternColor);
+                wingGradient.addColorStop(1, currentSnakeTheme.bodyColor);
+
+                // Dibujar alas superiores
+                ctx.fillStyle = wingGradient;
+
+                // Ala superior izquierda
+                ctx.beginPath();
+                ctx.ellipse(
+                    -segmentSize * 0.15,
+                    -segmentSize * 0.1,
+                    segmentSize * 0.25 * wingFlapFactor,
+                    segmentSize * 0.3,
+                    -Math.PI/4,
+                    0,
+                    Math.PI * 2
+                );
+                ctx.fill();
+
+                // Ala superior derecha
+                ctx.beginPath();
+                ctx.ellipse(
+                    segmentSize * 0.15,
+                    -segmentSize * 0.1,
+                    segmentSize * 0.25 * wingFlapFactor,
+                    segmentSize * 0.3,
+                    Math.PI/4,
+                    0,
+                    Math.PI * 2
+                );
+                ctx.fill();
+
+                // Alas inferiores con color ligeramente diferente
+                ctx.fillStyle = currentSnakeTheme.patternColor;
+
+                // Ala inferior izquierda
+                ctx.beginPath();
+                ctx.ellipse(
+                    -segmentSize * 0.12,
+                    segmentSize * 0.1,
+                    segmentSize * 0.2 * wingFlapFactor,
+                    segmentSize * 0.25,
+                    Math.PI/6,
+                    0,
+                    Math.PI * 2
+                );
+                ctx.fill();
+
+                // Ala inferior derecha
+                ctx.beginPath();
+                ctx.ellipse(
+                    segmentSize * 0.12,
+                    segmentSize * 0.1,
+                    segmentSize * 0.2 * wingFlapFactor,
+                    segmentSize * 0.25,
+                    -Math.PI/6,
+                    0,
+                    Math.PI * 2
+                );
+                ctx.fill();
+
+                // Cuerpo de la mariposa
+                ctx.fillStyle = '#333333';
+                ctx.beginPath();
+                ctx.ellipse(0, 0, segmentSize * 0.05, segmentSize * 0.2, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Antenas
+                ctx.strokeStyle = '#333333';
+                ctx.lineWidth = 1;
+
+                // Antena izquierda
+                ctx.beginPath();
+                ctx.moveTo(0, -segmentSize * 0.15);
+                ctx.lineTo(-segmentSize * 0.15, -segmentSize * 0.25);
+                ctx.stroke();
+
+                // Antena derecha
+                ctx.beginPath();
+                ctx.moveTo(0, -segmentSize * 0.15);
+                ctx.lineTo(segmentSize * 0.15, -segmentSize * 0.25);
+                ctx.stroke();
+
+                // Pequeñas bolas en las puntas de las antenas
+                ctx.fillStyle = '#333333';
+                ctx.beginPath();
+                ctx.arc(-segmentSize * 0.15, -segmentSize * 0.25, segmentSize * 0.03, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.arc(segmentSize * 0.15, -segmentSize * 0.25, segmentSize * 0.03, 0, Math.PI * 2);
                 ctx.fill();
 
                 ctx.restore();
             }
             break;
 
-        case 'dots':
-            // Dibujar puntos en patrón
-            ctx.fillStyle = currentSnakeTheme.patternColor;
-            ctx.globalAlpha = 0.6;
-
-            // Patrón de 3 puntos
-            const dotRadius = 1.5;
-            const dotOffset = segmentSize / 3;
-
-            // Punto central
-            ctx.beginPath();
-            ctx.arc(x, y, dotRadius, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Puntos adicionales en segmentos específicos
-            if (index % 2 === 0) {
-                ctx.beginPath();
-                ctx.arc(x - dotOffset, y, dotRadius, 0, Math.PI * 2);
-                ctx.fill();
-
-                ctx.beginPath();
-                ctx.arc(x + dotOffset, y, dotRadius, 0, Math.PI * 2);
-                ctx.fill();
-            }
-
-            ctx.globalAlpha = 1;
-            break;
-
         case 'rainbow':
-            // Para el arcoíris, añadir brillo
+            // Mantener el efecto arcoíris como está (ya es muy bonito)
             ctx.fillStyle = '#ffffff';
             ctx.globalAlpha = 0.3 + Math.sin(time * 3 + index * 0.5) * 0.1;
 
@@ -1353,36 +1780,115 @@ function drawSnakeSegmentDecoration(segment, index, segmentSize, time) {
             ctx.globalAlpha = 1;
             break;
 
-        case 'stars':
+        case 'magical':
+            // Efecto mágico con estrellas y destellos
             // Dibujar pequeñas estrellas en segmentos específicos
-            if (index % 4 === 2) {
-                ctx.fillStyle = currentSnakeTheme.patternColor;
+            if (index % 3 === 1) {
+                ctx.fillStyle = '#ffffff';
                 ctx.save();
                 ctx.translate(x, y);
                 ctx.rotate(time + index * 0.1); // Rotación suave
 
                 // Dibujar estrella pequeña
-                drawStar(0, 0, 5, segmentSize / 4, segmentSize / 8);
+                const starSize = segmentSize * 0.3;
+                const innerRadius = starSize * 0.4;
+
+                // Estrella con color cambiante
+                const hue = (index * 20 + time * 30) % 360;
+                ctx.fillStyle = `hsl(${hue}, 80%, 75%)`;
+
+                drawStar(0, 0, 5, starSize, innerRadius);
+
+                // Borde blanco para la estrella
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1;
+                ctx.stroke();
 
                 ctx.restore();
             }
-            break;
 
-        case 'scales':
-            // Dibujar patrón de escamas
-            ctx.fillStyle = currentSnakeTheme.patternColor;
-            ctx.globalAlpha = 0.4;
+            // Añadir destellos mágicos en todos los segmentos
+            const sparkleCount = 2;
+            ctx.fillStyle = '#ffffff';
 
-            // Dibujar semicírculo en la parte inferior
-            ctx.beginPath();
-            ctx.arc(x, y + segmentSize / 4, segmentSize / 3, 0, Math.PI, true);
-            ctx.fill();
+            for (let i = 0; i < sparkleCount; i++) {
+                const sparkleAngle = time * 2 + (i * Math.PI * 2 / sparkleCount) + index * 0.5;
+                const distance = segmentSize * 0.3;
+                const sparkleX = x + Math.cos(sparkleAngle) * distance;
+                const sparkleY = y + Math.sin(sparkleAngle) * distance;
+                const sparkleSize = 1 + Math.sin(time * 3 + i + index) * 0.5;
+
+                ctx.globalAlpha = 0.6 + Math.sin(time * 4 + i + index) * 0.4;
+                ctx.beginPath();
+                ctx.arc(sparkleX, sparkleY, sparkleSize, 0, Math.PI * 2);
+                ctx.fill();
+            }
 
             ctx.globalAlpha = 1;
             break;
 
+        case 'mermaid':
+            // Patrón de escamas mejorado para el tema sirena
+            ctx.save();
+            ctx.translate(x, y);
+
+            // Escama principal con brillo
+            const scaleGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, segmentSize * 0.4);
+            scaleGradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
+            scaleGradient.addColorStop(0.5, currentSnakeTheme.patternColor);
+            scaleGradient.addColorStop(1, currentSnakeTheme.bodyColor);
+
+            ctx.fillStyle = scaleGradient;
+
+            // Dibujar escama con forma de abanico
+            ctx.beginPath();
+            ctx.arc(0, 0, segmentSize * 0.4, Math.PI * 0.8, Math.PI * 2.2, false);
+            ctx.lineTo(0, segmentSize * 0.1);
+            ctx.closePath();
+            ctx.fill();
+
+            // Borde de la escama
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // Detalles internos de la escama
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.lineWidth = 0.5;
+
+            // Líneas curvas dentro de la escama
+            for (let i = 1; i <= 2; i++) {
+                const radius = segmentSize * 0.4 * (i / 3);
+                ctx.beginPath();
+                ctx.arc(0, 0, radius, Math.PI * 0.8, Math.PI * 2.2, false);
+                ctx.stroke();
+            }
+
+            // Pequeñas burbujas alrededor (efecto submarino)
+            if (index % 4 === 0) {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+
+                for (let i = 0; i < 3; i++) {
+                    const bubbleAngle = time * 1.5 + (i * Math.PI * 2 / 3) + index * 0.2;
+                    const bubbleDistance = segmentSize * 0.5;
+                    const bubbleX = Math.cos(bubbleAngle) * bubbleDistance;
+                    const bubbleY = Math.sin(bubbleAngle) * bubbleDistance;
+                    const bubbleSize = 1 + Math.sin(time * 2 + i) * 0.5;
+
+                    ctx.globalAlpha = 0.4 + Math.sin(time * 3 + i) * 0.3;
+                    ctx.beginPath();
+                    ctx.arc(bubbleX, bubbleY, bubbleSize, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                ctx.globalAlpha = 1;
+            }
+
+            ctx.restore();
+            break;
+
         case 'glitter':
-            // Añadir efecto de purpurina/brillo
+            // Mantener el efecto de purpurina como está (ya es muy bonito)
             const glitterCount = 3;
             ctx.fillStyle = '#ffffff';
 
@@ -1412,13 +1918,7 @@ function drawSnakeSegmentDecoration(segment, index, segmentSize, time) {
 
             ctx.fillStyle = `rgba(255, 255, 255, ${pulseIntensity * 0.2})`;
             ctx.beginPath();
-            ctx.roundRect(
-                segment.x + segmentSize / 4,
-                segment.y + segmentSize / 4,
-                segmentSize / 2,
-                segmentSize / 2,
-                2
-            );
+            ctx.arc(x, y, segmentSize * 0.3, 0, Math.PI * 2);
             ctx.fill();
     }
 }
@@ -1464,171 +1964,592 @@ function drawFood() {
     try {
         // Calcular el tiempo para las animaciones
         const time = Date.now() * 0.001; // Tiempo en segundos para la animación
-        const pulseFactor = 1 + Math.sin(time * 2) * 0.15; // Factor de pulso entre 0.85 y 1.15
+        const pulseFactor = 1 + Math.sin(time * 2) * 0.3; // Factor de pulso aumentado entre 0.7 y 1.3
+        const rotationFactor = time * 1.5; // Rotación constante
 
-        // Aplicar brillo variable
-        const brightness = 1 + Math.sin(time * 2.5) * 0.2; // Brillo entre 0.8 y 1.2
+        // Aplicar brillo variable más intenso
+        const brightness = 1.5 + Math.sin(time * 2.5) * 0.5; // Brillo entre 1.0 y 2.0
 
-        // Decidir aleatoriamente qué tipo de comida dibujar (corazón, estrella, flor o emoji)
+        // Decidir aleatoriamente qué tipo de comida dibujar (8 tipos diferentes)
         // Usamos el tiempo para cambiar periódicamente, pero mantenemos la misma comida durante un tiempo
-        const foodType = Math.floor((time / 10) % 4); // Cambia cada ~10 segundos
+        const foodType = Math.floor((time / 8) % 8); // Cambia cada ~8 segundos, 8 tipos diferentes
 
-        // Configurar sombra para todos los tipos
-        ctx.shadowColor = `rgba(255, 105, 180, ${0.7 + Math.sin(time * 3) * 0.3})`; // Rosa brillante variable
-        ctx.shadowBlur = 15 * brightness;
+        // Configurar sombra más intensa para todos los tipos
+        ctx.shadowColor = `rgba(255, 255, 255, ${0.9 + Math.sin(time * 3) * 0.1})`; // Sombra blanca para mejor contraste
+        ctx.shadowBlur = 25 * brightness; // Sombra más grande
 
         // Centro de la comida
         const centerX = food.x + GRID_SIZE / 2;
         const centerY = food.y + GRID_SIZE / 2;
 
+        // Tamaño base aumentado para todas las comidas
+        const baseSize = GRID_SIZE * 1.2; // 120% del tamaño de la celda para mayor visibilidad
+
+        // Dibujar un resplandor de fondo para todas las comidas
+        const glowGradient = ctx.createRadialGradient(
+            centerX, centerY, 0,
+            centerX, centerY, baseSize * 1.5
+        );
+        glowGradient.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+        glowGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+        ctx.fillStyle = glowGradient;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, baseSize * 1.5, 0, Math.PI * 2);
+        ctx.fill();
+
         // Dibujar según el tipo de comida
         switch(foodType) {
-            case 0: // Corazón rosa
-                ctx.fillStyle = '#ff66b3'; // Rosa
+            case 0: // Diamante azul brillante
+                ctx.fillStyle = '#00FFFF'; // Cian brillante (más visible que el azul)
+                ctx.strokeStyle = '#FFFFFF'; // Borde blanco
+                ctx.lineWidth = 3; // Borde más grueso
+
                 ctx.save();
                 ctx.translate(centerX, centerY);
-                ctx.scale(pulseFactor, pulseFactor); // Aplicar efecto de pulso
+                ctx.rotate(rotationFactor * 0.5);
+                ctx.scale(pulseFactor * 1.3, pulseFactor * 1.3); // Escala aumentada
 
-                // Dibujar corazón
+                // Dibujar diamante
                 ctx.beginPath();
-                ctx.moveTo(0, -5);
-                ctx.bezierCurveTo(-10, -15, -15, 0, 0, 10);
-                ctx.bezierCurveTo(15, 0, 10, -15, 0, -5);
+                ctx.moveTo(0, -baseSize/2);
+                ctx.lineTo(baseSize/2, 0);
+                ctx.lineTo(0, baseSize/2);
+                ctx.lineTo(-baseSize/2, 0);
+                ctx.closePath();
                 ctx.fill();
+                ctx.stroke();
 
                 // Añadir brillo interior
-                ctx.fillStyle = '#ff99cc';
-                ctx.globalAlpha = 0.6;
+                ctx.fillStyle = '#FFFFFF';
+                ctx.globalAlpha = 0.8;
                 ctx.beginPath();
-                ctx.moveTo(0, -3);
-                ctx.bezierCurveTo(-6, -10, -9, 0, 0, 6);
-                ctx.bezierCurveTo(9, 0, 6, -10, 0, -3);
+                ctx.moveTo(0, -baseSize/6);
+                ctx.lineTo(baseSize/6, 0);
+                ctx.lineTo(0, baseSize/6);
+                ctx.lineTo(-baseSize/6, 0);
+                ctx.closePath();
                 ctx.fill();
 
+                // Añadir destellos alrededor del diamante
+                for (let i = 0; i < 4; i++) {
+                    const angle = (i / 4) * Math.PI * 2 + time;
+                    const sparkleX = Math.cos(angle) * (baseSize/1.5);
+                    const sparkleY = Math.sin(angle) * (baseSize/1.5);
+                    const sparkleSize = 2 + Math.sin(time * 5 + i) * 1;
+
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.globalAlpha = 0.7 + Math.sin(time * 4 + i) * 0.3;
+                    ctx.beginPath();
+                    ctx.arc(sparkleX, sparkleY, sparkleSize, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                ctx.globalAlpha = 1;
                 ctx.restore();
                 break;
 
             case 1: // Estrella brillante
-                // Gradiente para la estrella
+                // Gradiente para la estrella con colores más intensos
                 const starGradient = ctx.createRadialGradient(
                     centerX, centerY, 0,
-                    centerX, centerY, GRID_SIZE / 2 * pulseFactor
+                    centerX, centerY, baseSize / 1.5 * pulseFactor
                 );
-                starGradient.addColorStop(0, '#ffffff');
-                starGradient.addColorStop(0.3, '#ffff66');
-                starGradient.addColorStop(1, '#ffcc00');
+                starGradient.addColorStop(0, '#FFFFFF');
+                starGradient.addColorStop(0.3, '#FFFF00'); // Amarillo más intenso
+                starGradient.addColorStop(1, '#FFA500'); // Naranja para mejor contraste
+
+                // Borde para la estrella
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.lineWidth = 3;
 
                 ctx.fillStyle = starGradient;
 
-                // Dibujar la estrella principal con tamaño variable
+                // Dibujar la estrella principal con tamaño variable (más grande)
                 drawStar(
                     centerX,
                     centerY,
                     5,
-                    GRID_SIZE / 2 * pulseFactor,
-                    GRID_SIZE / 4 * pulseFactor
+                    baseSize / 1.5 * pulseFactor,
+                    baseSize / 3 * pulseFactor
                 );
+
+                // Añadir borde a la estrella principal
+                ctx.stroke();
 
                 // Añadir un resplandor adicional rotando
                 ctx.save();
                 ctx.translate(centerX, centerY);
-                ctx.rotate(time); // Rotación basada en el tiempo
-                ctx.globalAlpha = 0.4;
+                ctx.rotate(time * 1.5); // Rotación más rápida
+                ctx.globalAlpha = 0.6; // Más visible
 
                 // Estrella exterior rotando
-                ctx.fillStyle = '#ffff99';
+                ctx.fillStyle = '#FFFF33'; // Amarillo más brillante
                 drawStar(
                     0,
                     0,
                     5,
-                    GRID_SIZE / 1.8 * pulseFactor,
-                    GRID_SIZE / 3.6 * pulseFactor
+                    baseSize / 1.3 * pulseFactor,
+                    baseSize / 2.6 * pulseFactor
                 );
 
+                // Añadir destellos alrededor de la estrella
+                for (let i = 0; i < 5; i++) {
+                    const angle = (i / 5) * Math.PI * 2 + time * 2;
+                    const distance = baseSize / 1.2 + Math.sin(time * 3 + i) * 5;
+                    const sparkleSize = 3 + Math.sin(time * 5 + i) * 2;
+
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.globalAlpha = 0.8 + Math.sin(time * 4 + i) * 0.2;
+                    ctx.beginPath();
+                    ctx.arc(
+                        Math.cos(angle) * distance,
+                        Math.sin(angle) * distance,
+                        sparkleSize,
+                        0,
+                        Math.PI * 2
+                    );
+                    ctx.fill();
+                }
+
+                ctx.globalAlpha = 1;
                 ctx.restore();
                 break;
 
-            case 2: // Flor colorida
+            case 2: // Flor colorida con colores más brillantes
                 ctx.save();
                 ctx.translate(centerX, centerY);
-                ctx.scale(pulseFactor, pulseFactor);
+                ctx.scale(pulseFactor * 1.3, pulseFactor * 1.3); // Escala aumentada
+                ctx.rotate(time * 0.3); // Rotación lenta de toda la flor
 
-                // Dibujar pétalos
-                const petalColors = ['#ff66b3', '#ff99cc', '#cc99ff', '#99ccff', '#99ffcc'];
-                const petalCount = 5;
+                // Dibujar pétalos con colores más brillantes y contrastantes
+                const petalColors = ['#FF3366', '#33CCFF', '#FFCC00', '#66FF66', '#FF66FF', '#FF9900'];
+                const petalCount = 6; // Más pétalos
+                const petalLength = baseSize/3;
+                const petalWidth = baseSize/5;
+
+                // Borde blanco para todos los pétalos
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.lineWidth = 2;
 
                 for (let i = 0; i < petalCount; i++) {
                     ctx.fillStyle = petalColors[i % petalColors.length];
                     ctx.save();
                     ctx.rotate((Math.PI * 2 / petalCount) * i + time * 0.5); // Rotación suave
 
-                    // Dibujar pétalo
+                    // Dibujar pétalo más grande
                     ctx.beginPath();
-                    ctx.ellipse(0, -8, 5, 8, 0, 0, Math.PI * 2);
+                    ctx.ellipse(0, -petalLength/1.5, petalWidth, petalLength, 0, 0, Math.PI * 2);
                     ctx.fill();
+                    ctx.stroke(); // Añadir borde blanco
+
+                    // Añadir brillo al pétalo
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.globalAlpha = 0.5;
+                    ctx.beginPath();
+                    ctx.ellipse(0, -petalLength/1.5, petalWidth/2, petalLength/2, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
 
                     ctx.restore();
                 }
 
-                // Centro de la flor
-                ctx.fillStyle = '#ffcc00';
+                // Centro de la flor más grande y brillante
+                ctx.fillStyle = '#FFCC00'; // Amarillo más brillante
                 ctx.beginPath();
-                ctx.arc(0, 0, 5, 0, Math.PI * 2);
+                ctx.arc(0, 0, baseSize/5, 0, Math.PI * 2);
                 ctx.fill();
+                ctx.stroke(); // Añadir borde blanco
+
+                // Detalles en el centro
+                for (let i = 0; i < 8; i++) {
+                    const angle = (i / 8) * Math.PI * 2;
+                    const distance = baseSize/10;
+
+                    ctx.fillStyle = '#FF6600'; // Naranja
+                    ctx.beginPath();
+                    ctx.arc(
+                        Math.cos(angle) * distance,
+                        Math.sin(angle) * distance,
+                        baseSize/20,
+                        0,
+                        Math.PI * 2
+                    );
+                    ctx.fill();
+                }
 
                 // Brillo en el centro
-                ctx.fillStyle = '#ffffff';
-                ctx.globalAlpha = 0.6;
+                ctx.fillStyle = '#FFFFFF';
+                ctx.globalAlpha = 0.8;
                 ctx.beginPath();
-                ctx.arc(0, 0, 3, 0, Math.PI * 2);
+                ctx.arc(0, 0, baseSize/10, 0, Math.PI * 2);
                 ctx.fill();
+                ctx.globalAlpha = 1;
+
+                // Añadir destellos alrededor de la flor
+                for (let i = 0; i < 6; i++) {
+                    const angle = (i / 6) * Math.PI * 2 + time * 2;
+                    const distance = baseSize/1.2 + Math.sin(time * 3 + i) * 3;
+                    const sparkleSize = 2 + Math.sin(time * 5 + i) * 1;
+
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.globalAlpha = 0.7 + Math.sin(time * 4 + i) * 0.3;
+                    ctx.beginPath();
+                    ctx.arc(
+                        Math.cos(angle) * distance,
+                        Math.sin(angle) * distance,
+                        sparkleSize,
+                        0,
+                        Math.PI * 2
+                    );
+                    ctx.fill();
+                }
+                ctx.globalAlpha = 1;
 
                 ctx.restore();
                 break;
 
-            case 3: // Emoji con brillo
+            case 3: // Emoji con brillo mejorado
                 ctx.save();
                 ctx.translate(centerX, centerY);
-                ctx.scale(pulseFactor, pulseFactor);
+                ctx.scale(pulseFactor * 1.5, pulseFactor * 1.5); // Escala aumentada significativamente
 
-                // Seleccionar un emoji juvenil
+                // Seleccionar un emoji juvenil (solo los más visibles)
                 const emojis = ['🌟', '💖', '🦄', '🌈', '✨', '💎', '🎀'];
                 const emojiIndex = Math.floor((time / 5) % emojis.length); // Cambiar cada ~5 segundos
 
-                // Dibujar fondo brillante
-                const glowGradient = ctx.createRadialGradient(0, 0, 2, 0, 0, 12);
-                glowGradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
-                glowGradient.addColorStop(1, 'rgba(255, 192, 203, 0)');
+                // Dibujar fondo brillante más grande e intenso
+                const glowGradient = ctx.createRadialGradient(0, 0, 2, 0, 0, baseSize/2);
+                glowGradient.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+                glowGradient.addColorStop(0.5, 'rgba(255, 255, 0, 0.5)'); // Amarillo para mejor contraste
+                glowGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
 
                 ctx.fillStyle = glowGradient;
                 ctx.beginPath();
-                ctx.arc(0, 0, 12, 0, Math.PI * 2);
+                ctx.arc(0, 0, baseSize/2, 0, Math.PI * 2);
                 ctx.fill();
 
-                // Dibujar el emoji
-                ctx.font = '16px Arial';
+                // Dibujar círculo de fondo para el emoji
+                ctx.fillStyle = '#FFFFFF';
+                ctx.beginPath();
+                ctx.arc(0, 0, baseSize/4, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Borde para el círculo
+                ctx.strokeStyle = '#FFCC00';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Dibujar el emoji más grande
+                ctx.font = 'bold 20px Arial'; // Fuente más grande y en negrita
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(emojis[emojiIndex], 0, 0);
 
+                // Añadir destellos orbitando alrededor del emoji
+                for (let i = 0; i < 8; i++) {
+                    const angle = (i / 8) * Math.PI * 2 + time * 2;
+                    const distance = baseSize/2 + Math.sin(time * 3 + i) * 5;
+                    const sparkleSize = 2 + Math.sin(time * 5 + i) * 1;
+
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.globalAlpha = 0.8 + Math.sin(time * 4 + i) * 0.2;
+                    ctx.beginPath();
+                    ctx.arc(
+                        Math.cos(angle) * distance,
+                        Math.sin(angle) * distance,
+                        sparkleSize,
+                        0,
+                        Math.PI * 2
+                    );
+                    ctx.fill();
+                }
+
+                // Añadir un efecto de rotación de pequeñas estrellas
+                ctx.save();
+                ctx.rotate(time * 3);
+
+                for (let i = 0; i < 4; i++) {
+                    const angle = (i / 4) * Math.PI * 2;
+                    const starX = Math.cos(angle) * (baseSize/3);
+                    const starY = Math.sin(angle) * (baseSize/3);
+
+                    ctx.fillStyle = '#FFFF00';
+                    ctx.globalAlpha = 0.7;
+                    drawStar(starX, starY, 5, 3, 1.5);
+                }
+
+                ctx.restore();
+                ctx.globalAlpha = 1;
+                ctx.restore();
+                break;
+            case 4: // Corazón verde brillante
+                ctx.fillStyle = '#00FF66'; // Verde brillante
+                ctx.strokeStyle = '#FFFFFF'; // Borde blanco
+                ctx.lineWidth = 3;
+
+                ctx.save();
+                ctx.translate(centerX, centerY);
+                ctx.scale(pulseFactor * 1.4, pulseFactor * 1.4); // Escala aumentada
+                ctx.rotate(Math.sin(time) * 0.3); // Balanceo suave
+
+                // Dibujar corazón
+                ctx.beginPath();
+                ctx.moveTo(0, baseSize/4);
+                ctx.bezierCurveTo(-baseSize/2, -baseSize/4, -baseSize/2, -baseSize/2, 0, -baseSize/2);
+                ctx.bezierCurveTo(baseSize/2, -baseSize/2, baseSize/2, -baseSize/4, 0, baseSize/4);
+                ctx.fill();
+                ctx.stroke();
+
+                // Añadir brillo interior
+                ctx.fillStyle = '#FFFFFF';
+                ctx.globalAlpha = 0.6;
+                ctx.beginPath();
+                ctx.moveTo(0, baseSize/8);
+                ctx.bezierCurveTo(-baseSize/4, -baseSize/8, -baseSize/4, -baseSize/4, 0, -baseSize/4);
+                ctx.bezierCurveTo(baseSize/4, -baseSize/4, baseSize/4, -baseSize/8, 0, baseSize/8);
+                ctx.fill();
+
+                // Añadir destellos alrededor
+                for (let i = 0; i < 6; i++) {
+                    const angle = (i / 6) * Math.PI * 2 + time * 2;
+                    const distance = baseSize/1.5 + Math.sin(time * 3 + i) * 5;
+                    const sparkleSize = 2 + Math.sin(time * 5 + i) * 1;
+
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.globalAlpha = 0.7 + Math.sin(time * 4 + i) * 0.3;
+                    ctx.beginPath();
+                    ctx.arc(
+                        Math.cos(angle) * distance,
+                        Math.sin(angle) * distance,
+                        sparkleSize,
+                        0,
+                        Math.PI * 2
+                    );
+                    ctx.fill();
+                }
+
+                ctx.globalAlpha = 1;
+                ctx.restore();
+                break;
+
+            case 5: // Corona dorada
+                ctx.fillStyle = '#FFD700'; // Dorado
+                ctx.strokeStyle = '#FFFFFF'; // Borde blanco
+                ctx.lineWidth = 3;
+
+                ctx.save();
+                ctx.translate(centerX, centerY);
+                ctx.scale(pulseFactor * 1.3, pulseFactor * 1.3);
+                ctx.rotate(Math.sin(time * 0.5) * 0.2); // Balanceo lento
+
+                // Dibujar base de la corona
+                ctx.beginPath();
+                ctx.moveTo(-baseSize/2, baseSize/4);
+                ctx.lineTo(baseSize/2, baseSize/4);
+                ctx.lineTo(baseSize/2, 0);
+                ctx.lineTo(baseSize/3, -baseSize/4);
+                ctx.lineTo(baseSize/6, 0);
+                ctx.lineTo(0, -baseSize/2);
+                ctx.lineTo(-baseSize/6, 0);
+                ctx.lineTo(-baseSize/3, -baseSize/4);
+                ctx.lineTo(-baseSize/2, 0);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+
+                // Añadir joyas a la corona
+                const jewelColors = ['#FF3366', '#33CCFF', '#66FF66'];
+                const jewelPositions = [
+                    {x: -baseSize/3, y: -baseSize/8},
+                    {x: 0, y: -baseSize/3},
+                    {x: baseSize/3, y: -baseSize/8}
+                ];
+
+                jewelPositions.forEach((pos, i) => {
+                    ctx.fillStyle = jewelColors[i % jewelColors.length];
+                    ctx.beginPath();
+                    ctx.arc(pos.x, pos.y, baseSize/8, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // Brillo en las joyas
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.globalAlpha = 0.7;
+                    ctx.beginPath();
+                    ctx.arc(pos.x - baseSize/20, pos.y - baseSize/20, baseSize/20, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+                // Añadir destellos alrededor
+                for (let i = 0; i < 6; i++) {
+                    const angle = (i / 6) * Math.PI * 2 + time * 2;
+                    const distance = baseSize/1.2 + Math.sin(time * 3 + i) * 5;
+                    const sparkleSize = 2 + Math.sin(time * 5 + i) * 1;
+
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.globalAlpha = 0.7 + Math.sin(time * 4 + i) * 0.3;
+                    ctx.beginPath();
+                    ctx.arc(
+                        Math.cos(angle) * distance,
+                        Math.sin(angle) * distance,
+                        sparkleSize,
+                        0,
+                        Math.PI * 2
+                    );
+                    ctx.fill();
+                }
+
+                ctx.globalAlpha = 1;
+                ctx.restore();
+                break;
+
+            case 6: // Caramelo multicolor giratorio
+                ctx.save();
+                ctx.translate(centerX, centerY);
+                ctx.scale(pulseFactor * 1.3, pulseFactor * 1.3);
+                ctx.rotate(time * 1.2); // Rotación rápida
+
+                // Dibujar caramelo con rayas
+                const candyColors = ['#FF3366', '#33CCFF', '#FFCC00', '#66FF66'];
+                const stripeCount = 4;
+
+                for (let i = 0; i < stripeCount; i++) {
+                    const startAngle = (i / stripeCount) * Math.PI * 2;
+                    const endAngle = ((i + 1) / stripeCount) * Math.PI * 2;
+
+                    ctx.fillStyle = candyColors[i % candyColors.length];
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.arc(0, 0, baseSize/2, startAngle, endAngle);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+
+                // Borde blanco
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(0, 0, baseSize/2, 0, Math.PI * 2);
+                ctx.stroke();
+
+                // Centro brillante
+                ctx.fillStyle = '#FFFFFF';
+                ctx.globalAlpha = 0.7;
+                ctx.beginPath();
+                ctx.arc(0, 0, baseSize/6, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Añadir destellos alrededor
+                for (let i = 0; i < 6; i++) {
+                    const angle = (i / 6) * Math.PI * 2 + time * 2;
+                    const distance = baseSize/1.2 + Math.sin(time * 3 + i) * 5;
+                    const sparkleSize = 2 + Math.sin(time * 5 + i) * 1;
+
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.globalAlpha = 0.7 + Math.sin(time * 4 + i) * 0.3;
+                    ctx.beginPath();
+                    ctx.arc(
+                        Math.cos(angle) * distance,
+                        Math.sin(angle) * distance,
+                        sparkleSize,
+                        0,
+                        Math.PI * 2
+                    );
+                    ctx.fill();
+                }
+
+                ctx.globalAlpha = 1;
+                ctx.restore();
+                break;
+
+            case 7: // Cristal púrpura brillante
+                ctx.fillStyle = '#9933FF'; // Púrpura brillante
+                ctx.strokeStyle = '#FFFFFF'; // Borde blanco
+                ctx.lineWidth = 3;
+
+                ctx.save();
+                ctx.translate(centerX, centerY);
+                ctx.scale(pulseFactor * 1.4, pulseFactor * 1.4);
+                ctx.rotate(time * 0.6 + Math.sin(time) * 0.3); // Rotación con oscilación
+
+                // Dibujar cristal hexagonal
+                ctx.beginPath();
+                for (let i = 0; i < 6; i++) {
+                    const angle = (i / 6) * Math.PI * 2;
+                    const x = Math.cos(angle) * baseSize/2;
+                    const y = Math.sin(angle) * baseSize/2;
+
+                    if (i === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+
+                // Añadir facetas internas
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+                ctx.lineWidth = 2;
+
+                for (let i = 0; i < 3; i++) {
+                    const angle1 = (i / 3) * Math.PI * 2;
+                    const angle2 = ((i + 1.5) / 3) * Math.PI * 2;
+
+                    ctx.beginPath();
+                    ctx.moveTo(Math.cos(angle1) * baseSize/2, Math.sin(angle1) * baseSize/2);
+                    ctx.lineTo(Math.cos(angle2) * baseSize/2, Math.sin(angle2) * baseSize/2);
+                    ctx.stroke();
+                }
+
+                // Brillo central
+                ctx.fillStyle = '#FFFFFF';
+                ctx.globalAlpha = 0.7;
+                ctx.beginPath();
+                ctx.arc(0, 0, baseSize/6, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Añadir destellos alrededor
+                for (let i = 0; i < 6; i++) {
+                    const angle = (i / 6) * Math.PI * 2 + time * 2;
+                    const distance = baseSize/1.2 + Math.sin(time * 3 + i) * 5;
+                    const sparkleSize = 2 + Math.sin(time * 5 + i) * 1;
+
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.globalAlpha = 0.7 + Math.sin(time * 4 + i) * 0.3;
+                    ctx.beginPath();
+                    ctx.arc(
+                        Math.cos(angle) * distance,
+                        Math.sin(angle) * distance,
+                        sparkleSize,
+                        0,
+                        Math.PI * 2
+                    );
+                    ctx.fill();
+                }
+
+                ctx.globalAlpha = 1;
                 ctx.restore();
                 break;
         }
 
         // Añadir pequeñas estrellas alrededor (para todos los tipos)
         ctx.save();
-        ctx.globalAlpha = 0.4 + Math.sin(time * 3) * 0.2; // Opacidad pulsante
+        ctx.globalAlpha = 0.6 + Math.sin(time * 3) * 0.2; // Opacidad pulsante más visible
 
-        // Dibujar 3 pequeñas estrellas orbitando
-        for (let i = 0; i < 3; i++) {
-            const angle = time * 2 + (i * Math.PI * 2 / 3);
-            const orbitRadius = GRID_SIZE * 0.8;
+        // Dibujar 5 pequeñas estrellas orbitando (más estrellas)
+        for (let i = 0; i < 5; i++) {
+            const angle = time * 2 + (i * Math.PI * 2 / 5);
+            const orbitRadius = baseSize * 1.2; // Órbita más grande
             const starX = centerX + Math.cos(angle) * orbitRadius;
             const starY = centerY + Math.sin(angle) * orbitRadius;
 
-            ctx.fillStyle = '#ffffff';
+            // Estrellas más grandes y brillantes
+            ctx.fillStyle = '#FFFFFF';
             ctx.beginPath();
-            ctx.arc(starX, starY, 1.5, 0, Math.PI * 2);
+            ctx.arc(starX, starY, 2.5, 0, Math.PI * 2);
             ctx.fill();
         }
 
