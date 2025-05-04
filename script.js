@@ -15,7 +15,7 @@ const closeRewardsListButton = document.getElementById('closeRewardsListButton')
 const closeButtons = document.querySelectorAll('.close-button');
 
 // --- Constantes del Juego ---
-const GRID_SIZE = 20; // Tamaño de cada celda de la cuadrícula
+let GRID_SIZE = 20; // Tamaño de cada celda de la cuadrícula (puede cambiar en móviles)
 let CANVAS_WIDTH = canvas.width;
 let CANVAS_HEIGHT = canvas.height;
 let ROWS = CANVAS_HEIGHT / GRID_SIZE;
@@ -2727,6 +2727,22 @@ function drawStar(cx, cy, spikes, outerRadius, innerRadius) {
 
 function drawGameOver() {
     try {
+        // Detectar si estamos en un dispositivo móvil para ajustar tamaños
+        const isMobile = isMobileDevice || window.innerWidth < 768;
+
+        // Ajustar tamaños según el dispositivo
+        const titleFontSize = isMobile ? Math.min(50, CANVAS_WIDTH / 8) : 60;
+        const nameFontSize = isMobile ? Math.min(30, CANVAS_WIDTH / 12) : 40;
+        const scoreFontSize = isMobile ? Math.min(26, CANVAS_WIDTH / 15) : 32;
+        const rewardTitleFontSize = isMobile ? Math.min(22, CANVAS_WIDTH / 18) : 28;
+        const rewardTextFontSize = isMobile ? Math.min(18, CANVAS_WIDTH / 22) : 22;
+        const footerFontSize = isMobile ? Math.min(14, CANVAS_WIDTH / 28) : 18;
+
+        // Calcular posiciones relativas al tamaño del canvas
+        const titleY = CANVAS_HEIGHT * 0.2;
+        const nameY = titleY + titleFontSize * 0.9;
+        const scoreY = nameY + nameFontSize * 1.2;
+
         // Crear un fondo con degradado pastel
         const gradient = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
         gradient.addColorStop(0, '#ffcce6'); // Rosa pastel claro
@@ -2738,48 +2754,59 @@ function drawGameOver() {
         drawGameOverBackground();
 
         // Dibujar un marco decorativo con bordes redondeados
+        const borderWidth = isMobile ? 5 : 8;
+        const borderPadding = isMobile ? 20 : 30;
+
         ctx.strokeStyle = '#ff66b3'; // Rosa más intenso
-        ctx.lineWidth = 8;
+        ctx.lineWidth = borderWidth;
         ctx.beginPath();
-        ctx.roundRect(30, 30, CANVAS_WIDTH - 60, CANVAS_HEIGHT - 60, 20);
+        ctx.roundRect(borderPadding, borderPadding,
+                     CANVAS_WIDTH - (borderPadding * 2),
+                     CANVAS_HEIGHT - (borderPadding * 2), 20);
         ctx.stroke();
 
         // Añadir un segundo marco interior con otro color
+        const innerBorderWidth = isMobile ? 2 : 3;
+        const innerPadding = borderPadding + borderWidth + 5;
+
         ctx.strokeStyle = '#cc33ff'; // Morado
-        ctx.lineWidth = 3;
+        ctx.lineWidth = innerBorderWidth;
         ctx.beginPath();
-        ctx.roundRect(45, 45, CANVAS_WIDTH - 90, CANVAS_HEIGHT - 90, 15);
+        ctx.roundRect(innerPadding, innerPadding,
+                     CANVAS_WIDTH - (innerPadding * 2),
+                     CANVAS_HEIGHT - (innerPadding * 2), 15);
         ctx.stroke();
 
         ctx.textAlign = 'center'; // Asegurar alineación central
 
         // Título Game Over con efecto de sombra y brillo
-        ctx.font = 'bold 60px "Pacifico", cursive';
+        ctx.font = `bold ${titleFontSize}px "Pacifico", cursive`;
         // Sombra para el texto
         ctx.shadowColor = '#ff1493';
-        ctx.shadowBlur = 15;
+        ctx.shadowBlur = isMobile ? 10 : 15;
         ctx.fillStyle = '#ff1493'; // Rosa intenso
-        ctx.fillText('¡Game Over!', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 120);
+        ctx.fillText('¡Game Over!', CANVAS_WIDTH / 2, titleY);
         ctx.shadowBlur = 0;
 
         // Nombre personalizado con estilo juvenil
-        ctx.font = 'bold 40px "Pacifico", cursive';
+        ctx.font = `bold ${nameFontSize}px "Pacifico", cursive`;
         ctx.fillStyle = '#9400d3'; // Morado
-        ctx.fillText('Teresa Elizabeth', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 60);
+        ctx.fillText('Teresa Elizabeth', CANVAS_WIDTH / 2, nameY);
 
         // Puntuación con fondo decorativo
         const scoreText = `Puntuación Final: ${score}`;
-        ctx.font = 'bold 32px "Poppins", sans-serif';
+        ctx.font = `bold ${scoreFontSize}px "Poppins", sans-serif`;
 
         // Medir el texto para crear un fondo
         const scoreWidth = ctx.measureText(scoreText).width;
+        const scorePadding = isMobile ? 15 : 20;
 
         // Dibujar un fondo para la puntuación
         const scoreGradient = ctx.createLinearGradient(
-            CANVAS_WIDTH / 2 - scoreWidth / 2 - 20,
-            CANVAS_HEIGHT / 2 - 20,
-            CANVAS_WIDTH / 2 + scoreWidth / 2 + 20,
-            CANVAS_HEIGHT / 2 + 20
+            CANVAS_WIDTH / 2 - scoreWidth / 2 - scorePadding,
+            scoreY - scoreFontSize / 2,
+            CANVAS_WIDTH / 2 + scoreWidth / 2 + scorePadding,
+            scoreY + scoreFontSize / 2
         );
         scoreGradient.addColorStop(0, '#ff66b3');
         scoreGradient.addColorStop(1, '#ff1493');
@@ -2787,17 +2814,17 @@ function drawGameOver() {
         ctx.fillStyle = scoreGradient;
         ctx.beginPath();
         ctx.roundRect(
-            CANVAS_WIDTH / 2 - scoreWidth / 2 - 20,
-            CANVAS_HEIGHT / 2 - 20,
-            scoreWidth + 40,
-            40,
-            20
+            CANVAS_WIDTH / 2 - scoreWidth / 2 - scorePadding,
+            scoreY - scoreFontSize / 2 - 10,
+            scoreWidth + (scorePadding * 2),
+            scoreFontSize + 20,
+            15
         );
         ctx.fill();
 
         // Texto de puntuación
         ctx.fillStyle = '#ffffff'; // Blanco
-        ctx.fillText(scoreText, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 10);
+        ctx.fillText(scoreText, CANVAS_WIDTH / 2, scoreY + scoreFontSize / 4);
 
         // Información sobre premios ganados en esta partida
         const allRewardsEarned = checkAllRewardsEarned();
@@ -2805,17 +2832,19 @@ function drawGameOver() {
             pendingRewards.some(pr => pr.points === r.points)
         );
 
+        // Calcular posición de la sección de premios
+        const rewardsSectionY = scoreY + scoreFontSize * 1.5;
+        const rewardsSectionHeight = isMobile ? 120 : 150;
+        const rewardsSectionPadding = isMobile ? 30 : 50;
+
         if (rewardsInThisGame.length > 0) {
             // Dibujar un fondo decorativo para la sección de premios
-            const rewardsSectionY = CANVAS_HEIGHT / 2 + 40;
-            const rewardsSectionHeight = 150;
-
             ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
             ctx.beginPath();
             ctx.roundRect(
-                50,
+                rewardsSectionPadding,
                 rewardsSectionY,
-                CANVAS_WIDTH - 100,
+                CANVAS_WIDTH - (rewardsSectionPadding * 2),
                 rewardsSectionHeight,
                 15
             );
@@ -2823,30 +2852,30 @@ function drawGameOver() {
 
             // Borde decorativo para la sección de premios
             ctx.strokeStyle = '#ff66b3';
-            ctx.lineWidth = 3;
+            ctx.lineWidth = innerBorderWidth;
             ctx.beginPath();
             ctx.roundRect(
-                50,
+                rewardsSectionPadding,
                 rewardsSectionY,
-                CANVAS_WIDTH - 100,
+                CANVAS_WIDTH - (rewardsSectionPadding * 2),
                 rewardsSectionHeight,
                 15
             );
             ctx.stroke();
 
             // Mostrar mensaje de premios ganados con estilo juvenil
-            ctx.font = 'bold 28px "Poppins", sans-serif';
+            ctx.font = `bold ${rewardTitleFontSize}px "Poppins", sans-serif`;
             ctx.fillStyle = '#ff1493'; // Rosa intenso
             ctx.fillText(`¡Has ganado ${rewardsInThisGame.length} premio(s)!`,
-                CANVAS_WIDTH / 2, rewardsSectionY + 35);
+                CANVAS_WIDTH / 2, rewardsSectionY + rewardTitleFontSize);
 
             // Mostrar el nombre del último premio ganado
             const lastReward = rewardsInThisGame[rewardsInThisGame.length - 1];
-            ctx.font = '22px "Poppins", sans-serif';
+            ctx.font = `${rewardTextFontSize}px "Poppins", sans-serif`;
             ctx.fillStyle = '#9400d3'; // Morado
 
             // Dividir la descripción en dos líneas si es muy larga
-            const maxWidth = CANVAS_WIDTH - 150;
+            const maxWidth = CANVAS_WIDTH - (rewardsSectionPadding * 2) - 50;
             const description = lastReward.description;
 
             if (ctx.measureText(description).width > maxWidth) {
@@ -2873,20 +2902,23 @@ function drawGameOver() {
                 }
 
                 // Dibujar las dos líneas
-                ctx.fillText(line1, CANVAS_WIDTH / 2, rewardsSectionY + 70);
+                const line1Y = rewardsSectionY + rewardTitleFontSize + rewardTextFontSize;
+                ctx.fillText(line1, CANVAS_WIDTH / 2, line1Y);
                 if (line2) {
-                    ctx.fillText(line2, CANVAS_WIDTH / 2, rewardsSectionY + 100);
+                    ctx.fillText(line2, CANVAS_WIDTH / 2, line1Y + rewardTextFontSize * 1.2);
                 }
             } else {
                 // Si cabe en una línea
-                ctx.fillText(description, CANVAS_WIDTH / 2, rewardsSectionY + 70);
+                ctx.fillText(description, CANVAS_WIDTH / 2,
+                            rewardsSectionY + rewardTitleFontSize + rewardTextFontSize);
             }
 
             // Instrucciones para ver todos los premios con estilo juvenil
-            ctx.font = '20px "Poppins", sans-serif';
+            const instructionFontSize = isMobile ? Math.min(16, CANVAS_WIDTH / 25) : 20;
+            ctx.font = `${instructionFontSize}px "Poppins", sans-serif`;
             ctx.fillStyle = '#0066ff'; // Azul
             ctx.fillText('Haz clic en "Ver Premios" para ver todas tus recompensas',
-                CANVAS_WIDTH / 2, rewardsSectionY + 130);
+                CANVAS_WIDTH / 2, rewardsSectionY + rewardsSectionHeight - instructionFontSize);
 
             // Dibujar estrellas decorativas alrededor del mensaje
             drawDecorativeStars();
@@ -2917,35 +2949,55 @@ function drawGameOver() {
             }
         } else {
             // Mensaje si no se ganaron premios en esta partida
-            const noRewardY = CANVAS_HEIGHT / 2 + 60;
-
-            // Fondo para el mensaje
             ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
             ctx.beginPath();
-            ctx.roundRect(50, noRewardY - 30, CANVAS_WIDTH - 100, 100, 15);
+            ctx.roundRect(
+                rewardsSectionPadding,
+                rewardsSectionY,
+                CANVAS_WIDTH - (rewardsSectionPadding * 2),
+                rewardsSectionHeight,
+                15
+            );
             ctx.fill();
 
             // Borde decorativo
             ctx.strokeStyle = '#ff66b3';
-            ctx.lineWidth = 3;
+            ctx.lineWidth = innerBorderWidth;
             ctx.beginPath();
-            ctx.roundRect(50, noRewardY - 30, CANVAS_WIDTH - 100, 100, 15);
+            ctx.roundRect(
+                rewardsSectionPadding,
+                rewardsSectionY,
+                CANVAS_WIDTH - (rewardsSectionPadding * 2),
+                rewardsSectionHeight,
+                15
+            );
             ctx.stroke();
 
-            ctx.font = 'bold 24px "Poppins", sans-serif';
-            ctx.fillStyle = '#9400d3'; // Morado
-            ctx.fillText('No has desbloqueado ningún premio en esta partida.',
-                CANVAS_WIDTH / 2, noRewardY + 10);
+            // Texto adaptado al tamaño de la pantalla
+            const noRewardFontSize = isMobile ? Math.min(20, CANVAS_WIDTH / 20) : 24;
+            const encourageFontSize = isMobile ? Math.min(18, CANVAS_WIDTH / 22) : 22;
 
-            ctx.font = '22px "Poppins", sans-serif';
+            ctx.font = `bold ${noRewardFontSize}px "Poppins", sans-serif`;
+            ctx.fillStyle = '#9400d3'; // Morado
+
+            // En móviles, dividir el texto en dos líneas si es necesario
+            if (isMobile) {
+                ctx.fillText('No has desbloqueado', CANVAS_WIDTH / 2, rewardsSectionY + noRewardFontSize * 1.2);
+                ctx.fillText('ningún premio en esta partida', CANVAS_WIDTH / 2, rewardsSectionY + noRewardFontSize * 2.4);
+            } else {
+                ctx.fillText('No has desbloqueado ningún premio en esta partida.',
+                    CANVAS_WIDTH / 2, rewardsSectionY + noRewardFontSize * 1.5);
+            }
+
+            ctx.font = `${encourageFontSize}px "Poppins", sans-serif`;
             ctx.fillStyle = '#ff1493'; // Rosa intenso
             ctx.fillText('¡Sigue intentándolo para ganar premios!',
-                CANVAS_WIDTH / 2, noRewardY + 50);
+                CANVAS_WIDTH / 2, rewardsSectionY + rewardsSectionHeight - encourageFontSize * 1.5);
         }
 
         // Recordatorio de intentos restantes con estilo juvenil
-        const reminderY = CANVAS_HEIGHT - 60;
-        ctx.font = 'italic 18px "Poppins", sans-serif';
+        const reminderY = CANVAS_HEIGHT - (isMobile ? 30 : 60);
+        ctx.font = `italic ${footerFontSize}px "Poppins", sans-serif`;
         ctx.fillStyle = '#9400d3'; // Morado
 
         // Calcular intentos restantes
@@ -3464,21 +3516,42 @@ function showWelcomeScreen() {
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
+    // Detectar si estamos en un dispositivo móvil para ajustar tamaños
+    const isMobile = isMobileDevice || window.innerWidth < 768;
+
+    // Ajustar tamaños según el dispositivo
+    const titleFontSize = isMobile ? Math.min(60, CANVAS_WIDTH / 8) : 80;
+    const subtitleFontSize = isMobile ? Math.min(30, CANVAS_WIDTH / 15) : 40;
+    const sloganFontSize = isMobile ? Math.min(24, CANVAS_WIDTH / 20) : 30;
+    const instructionsFontSize = isMobile ? Math.min(18, CANVAS_WIDTH / 25) : 22;
+    const footerFontSize = isMobile ? Math.min(14, CANVAS_WIDTH / 30) : 18;
+
+    // Calcular posiciones relativas al tamaño del canvas
+    const titleY = CANVAS_HEIGHT * 0.25;
+    const subtitleY = titleY + titleFontSize * 0.8;
+    const sloganY = subtitleY + subtitleFontSize * 1.5;
+
+    // Calcular tamaño y posición del cuadro de instrucciones
+    const instructionsWidth = isMobile ? CANVAS_WIDTH * 0.9 : 600;
+    const instructionsX = CANVAS_WIDTH / 2 - instructionsWidth / 2;
+    const instructionsY = sloganY + sloganFontSize * 1.2;
+    const instructionsHeight = isMobile ? 180 : 190;
+
     // Dibujar animaciones de perritos y gatitos alrededor del área de juego
     drawPetsAnimations();
 
     // Dibujar burbujas decorativas (menos opacas y evitando el área de instrucciones)
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < (isMobile ? 10 : 20); i++) {
         // Generar posición aleatoria
         let x = Math.random() * CANVAS_WIDTH;
         let y = Math.random() * CANVAS_HEIGHT;
 
         // Evitar el área central donde estarán las instrucciones
         const instructionsArea = {
-            minX: CANVAS_WIDTH / 2 - 320,
-            maxX: CANVAS_WIDTH / 2 + 320,
-            minY: CANVAS_HEIGHT / 2 + 40,
-            maxY: CANVAS_HEIGHT / 2 + 210
+            minX: instructionsX - 20,
+            maxX: instructionsX + instructionsWidth + 20,
+            minY: instructionsY - 20,
+            maxY: instructionsY + instructionsHeight + 20
         };
 
         // Si la burbuja está en el área de instrucciones, moverla a otra parte
@@ -3497,17 +3570,17 @@ function showWelcomeScreen() {
     }
 
     // Dibujar corazones decorativos (menos opacas y evitando el área de instrucciones)
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < (isMobile ? 5 : 10); i++) {
         // Generar posición aleatoria
         let x = Math.random() * CANVAS_WIDTH;
         let y = Math.random() * CANVAS_HEIGHT;
 
         // Evitar el área central donde estarán las instrucciones
         const instructionsArea = {
-            minX: CANVAS_WIDTH / 2 - 320,
-            maxX: CANVAS_WIDTH / 2 + 320,
-            minY: CANVAS_HEIGHT / 2 + 40,
-            maxY: CANVAS_HEIGHT / 2 + 210
+            minX: instructionsX - 20,
+            maxX: instructionsX + instructionsWidth + 20,
+            minY: instructionsY - 20,
+            maxY: instructionsY + instructionsHeight + 20
         };
 
         // Si el corazón está en el área de instrucciones, moverlo a otra parte
@@ -3527,10 +3600,10 @@ function showWelcomeScreen() {
     ctx.textAlign = 'center';
 
     // Título "SNAKE" con efecto de brillo mejorado
-    ctx.font = 'bold 80px "Pacifico", cursive';
+    ctx.font = `bold ${titleFontSize}px "Pacifico", cursive`;
     const titleGradient = ctx.createLinearGradient(
-        CANVAS_WIDTH / 2 - 150, CANVAS_HEIGHT / 2 - 100,
-        CANVAS_WIDTH / 2 + 150, CANVAS_HEIGHT / 2 - 100
+        CANVAS_WIDTH / 2 - CANVAS_WIDTH / 4, titleY,
+        CANVAS_WIDTH / 2 + CANVAS_WIDTH / 4, titleY
     );
     titleGradient.addColorStop(0, '#ff66b3');
     titleGradient.addColorStop(0.5, '#ff1493');
@@ -3538,29 +3611,29 @@ function showWelcomeScreen() {
 
     // Primero dibujamos un contorno para mejorar la legibilidad
     ctx.strokeStyle = 'white';
-    ctx.lineWidth = 8;
-    ctx.strokeText('SNAKE', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 100);
+    ctx.lineWidth = isMobile ? 6 : 8;
+    ctx.strokeText('SNAKE', CANVAS_WIDTH / 2, titleY);
 
     // Luego dibujamos el texto con el gradiente
     ctx.fillStyle = titleGradient;
     ctx.shadowColor = '#ff1493';
-    ctx.shadowBlur = 20; // Aumentamos el brillo
-    ctx.fillText('SNAKE', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 100);
+    ctx.shadowBlur = isMobile ? 15 : 20;
+    ctx.fillText('SNAKE', CANVAS_WIDTH / 2, titleY);
     ctx.shadowBlur = 0;
 
     // Nombre personalizado con mejor legibilidad
-    ctx.font = 'bold 40px "Poppins", sans-serif';
+    ctx.font = `bold ${subtitleFontSize}px "Poppins", sans-serif`;
 
     // Primero dibujamos un contorno para mejorar la legibilidad
     ctx.strokeStyle = 'white';
-    ctx.lineWidth = 6;
-    ctx.strokeText('para Teresa Elizabeth', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 40);
+    ctx.lineWidth = isMobile ? 4 : 6;
+    ctx.strokeText('para Teresa Elizabeth', CANVAS_WIDTH / 2, subtitleY);
 
     // Luego dibujamos el texto con color
     ctx.fillStyle = '#9933ff'; // Púrpura
     ctx.shadowColor = '#9933ff';
-    ctx.shadowBlur = 12;
-    ctx.fillText('para Teresa Elizabeth', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 40);
+    ctx.shadowBlur = isMobile ? 8 : 12;
+    ctx.fillText('para Teresa Elizabeth', CANVAS_WIDTH / 2, subtitleY);
     ctx.shadowBlur = 0;
 
     // Dibujar un marco decorativo alrededor del título
@@ -3568,39 +3641,34 @@ function showWelcomeScreen() {
     ctx.lineWidth = 3;
     ctx.beginPath();
     // Ampliamos el ancho y alto del marco para que cubra bien la palabra SNAKE
-    // Movemos el marco más arriba y lo hacemos más alto
-    ctx.roundRect(CANVAS_WIDTH / 2 - 280, CANVAS_HEIGHT / 2 - 180, 560, 170, 20);
+    const frameWidth = isMobile ? CANVAS_WIDTH * 0.9 : 560;
+    const frameHeight = isMobile ? titleFontSize * 2.5 : 170;
+    ctx.roundRect(CANVAS_WIDTH / 2 - frameWidth / 2, titleY - titleFontSize * 1.1, frameWidth, frameHeight, 20);
     ctx.stroke();
 
     // Dibujar estrellas decorativas alrededor del título
-    for (let i = 0; i < 8; i++) {
-        const angle = (i / 8) * Math.PI * 2;
-        const distance = 270;
+    for (let i = 0; i < (isMobile ? 6 : 8); i++) {
+        const angle = (i / (isMobile ? 6 : 8)) * Math.PI * 2;
+        const distance = isMobile ? CANVAS_WIDTH * 0.4 : 270;
         const x = CANVAS_WIDTH / 2 + Math.cos(angle) * distance;
-        const y = CANVAS_HEIGHT / 2 - 85 + Math.sin(angle) * 50;
-        drawStar(x, y, 5, 10, 5);
+        const y = titleY - titleFontSize * 0.3 + Math.sin(angle) * (isMobile ? 30 : 50);
+        drawStar(x, y, 5, isMobile ? 8 : 10, isMobile ? 4 : 5);
     }
 
     // Subtítulo con mejor legibilidad
-    ctx.font = 'bold 30px "Poppins", sans-serif';
+    ctx.font = `bold ${sloganFontSize}px "Poppins", sans-serif`;
 
     // Primero dibujamos un contorno para mejorar la legibilidad
     ctx.strokeStyle = 'white';
-    ctx.lineWidth = 5;
-    ctx.strokeText('¡Juega y gana premios increíbles!', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 30);
+    ctx.lineWidth = isMobile ? 4 : 5;
+    ctx.strokeText('¡Juega y gana premios increíbles!', CANVAS_WIDTH / 2, sloganY);
 
     // Luego dibujamos el texto con color
     ctx.fillStyle = '#ff1493'; // Rosa intenso
     ctx.shadowColor = '#ff1493';
-    ctx.shadowBlur = 10;
-    ctx.fillText('¡Juega y gana premios increíbles!', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 30);
+    ctx.shadowBlur = isMobile ? 8 : 10;
+    ctx.fillText('¡Juega y gana premios increíbles!', CANVAS_WIDTH / 2, sloganY);
     ctx.shadowBlur = 0;
-
-    // Instrucciones en un cuadro bonito
-    const instructionsX = CANVAS_WIDTH / 2 - 300;
-    const instructionsY = CANVAS_HEIGHT / 2 + 60;
-    const instructionsWidth = 600;
-    const instructionsHeight = 190; // Altura aumentada para acomodar el texto dividido en dos líneas
 
     // Fondo para instrucciones con mayor opacidad y borde
     ctx.fillStyle = 'rgba(255, 255, 255, 0.95)'; // Mayor opacidad para mejor contraste
@@ -3619,7 +3687,7 @@ function showWelcomeScreen() {
     ctx.stroke();
 
     // Instrucciones con mejor legibilidad
-    ctx.font = 'bold 22px "Poppins", sans-serif'; // Texto más grande y en negrita
+    ctx.font = `bold ${instructionsFontSize}px "Poppins", sans-serif`; // Texto más grande y en negrita
     ctx.fillStyle = '#000000'; // Negro puro para máximo contraste
     ctx.textAlign = 'left';
 
@@ -3629,12 +3697,23 @@ function showWelcomeScreen() {
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 0;
 
-    // Dibujar las instrucciones con mejor espaciado
-    ctx.fillText('• Usa las flechas del teclado para moverte', instructionsX + 30, instructionsY + 35);
-    ctx.fillText('• Come la comida para crecer y ganar puntos', instructionsX + 30, instructionsY + 75);
-    // Dividimos la tercera instrucción en dos líneas para que entre bien en el recuadro
-    ctx.fillText('• ¡Desbloquea premios al alcanzar', instructionsX + 30, instructionsY + 115);
-    ctx.fillText('   puntuaciones específicas!', instructionsX + 30, instructionsY + 145);
+    // Calcular posiciones para las instrucciones
+    const instructionPadding = instructionsWidth * 0.05;
+    const instructionLineHeight = instructionsFontSize * 1.6;
+
+    // Instrucciones adaptadas según el dispositivo
+    if (isMobile) {
+        // Instrucciones para móviles
+        ctx.fillText('• Desliza para mover la serpiente', instructionsX + instructionPadding, instructionsY + instructionLineHeight);
+        ctx.fillText('• Come la comida para ganar puntos', instructionsX + instructionPadding, instructionsY + instructionLineHeight * 2);
+        ctx.fillText('• ¡Desbloquea premios especiales!', instructionsX + instructionPadding, instructionsY + instructionLineHeight * 3);
+    } else {
+        // Instrucciones para PC
+        ctx.fillText('• Usa las flechas del teclado para moverte', instructionsX + 30, instructionsY + 35);
+        ctx.fillText('• Come la comida para crecer y ganar puntos', instructionsX + 30, instructionsY + 75);
+        ctx.fillText('• ¡Desbloquea premios al alcanzar', instructionsX + 30, instructionsY + 115);
+        ctx.fillText('   puntuaciones específicas!', instructionsX + 30, instructionsY + 145);
+    }
 
     // Resetear sombra
     ctx.shadowBlur = 0;
@@ -3643,7 +3722,7 @@ function showWelcomeScreen() {
     ctx.textAlign = 'center';
 
     // Mensaje de intentos diarios con mejor visibilidad
-    ctx.font = 'bold 18px "Poppins", sans-serif';
+    ctx.font = `bold ${footerFontSize}px "Poppins", sans-serif`;
     ctx.fillStyle = '#9933ff';
     // Añadir un resplandor blanco para mejor legibilidad
     ctx.shadowColor = 'white';
@@ -3655,7 +3734,14 @@ function showWelcomeScreen() {
         ? `Te quedan ${remainingAttempts} ${remainingAttempts === 1 ? 'intento' : 'intentos'} hoy`
         : 'Has agotado tus intentos de hoy';
 
-    ctx.fillText(`Recuerda que solo tienes ${MAX_DAILY_ATTEMPTS} intentos al día. ${attemptsText}`, CANVAS_WIDTH / 2, CANVAS_HEIGHT - 30);
+    // Texto de intentos diarios adaptado al tamaño de la pantalla
+    if (isMobile) {
+        ctx.fillText(`${MAX_DAILY_ATTEMPTS} intentos diarios.`, CANVAS_WIDTH / 2, CANVAS_HEIGHT - 40);
+        ctx.fillText(`${attemptsText}`, CANVAS_WIDTH / 2, CANVAS_HEIGHT - 15);
+    } else {
+        ctx.fillText(`Recuerda que solo tienes ${MAX_DAILY_ATTEMPTS} intentos al día. ${attemptsText}`, CANVAS_WIDTH / 2, CANVAS_HEIGHT - 30);
+    }
+
     ctx.shadowBlur = 0; // Resetear sombra
 
     // Dibujar una serpiente decorativa en la pantalla de inicio
@@ -3718,55 +3804,91 @@ function resizeCanvas() {
 
     // En dispositivos móviles, usar un enfoque diferente para maximizar el espacio vertical
     if (isMobileDevice || window.innerWidth < 768) {
-        // Calcular el espacio disponible en la pantalla
-        const availableHeight = window.innerHeight * 0.7; // 70% de la altura de la ventana para el juego
+        try {
+            // Calcular el espacio disponible en la pantalla
+            const availableHeight = window.innerHeight * 0.75; // 75% de la altura de la ventana para el juego
 
-        // Determinar el tamaño de la cuadrícula para dispositivos móviles (más pequeño para más espacio)
-        const mobileGridSize = 15; // Tamaño de cuadrícula más pequeño para móviles
+            // Determinar el tamaño de la cuadrícula para dispositivos móviles (más pequeño para más espacio)
+            const mobileGridSize = 15; // Tamaño de cuadrícula más pequeño para móviles
 
-        // Calcular cuántas celdas caben en el ancho y alto disponibles
-        const maxCols = Math.floor(availableWidth / mobileGridSize);
-        const maxRows = Math.floor(availableHeight / mobileGridSize);
+            // Calcular cuántas celdas caben en el ancho y alto disponibles
+            const maxCols = Math.floor(availableWidth / mobileGridSize);
+            const maxRows = Math.floor(availableHeight / mobileGridSize);
 
-        // Crear un canvas rectangular vertical para aprovechar mejor la pantalla del móvil
-        // Usar una proporción más vertical (menos ancho, más alto)
-        let newCols = Math.min(maxCols, 30); // Limitar el ancho a 30 celdas como máximo
-        let newRows = Math.min(maxRows, 40); // Permitir hasta 40 celdas de altura
+            // Crear un canvas rectangular vertical para aprovechar mejor la pantalla del móvil
+            // Usar una proporción más vertical (menos ancho, más alto)
+            let newCols = Math.min(maxCols, 25); // Limitar el ancho a 25 celdas como máximo
+            let newRows = Math.min(maxRows, 45); // Permitir hasta 45 celdas de altura
 
-        // Asegurarse de que el canvas tenga al menos un tamaño mínimo
-        newCols = Math.max(newCols, 20);
-        newRows = Math.max(newRows, 25);
+            // Asegurarse de que el canvas tenga al menos un tamaño mínimo
+            newCols = Math.max(newCols, 18);
+            newRows = Math.max(newRows, 30);
 
-        // Calcular las dimensiones finales
-        let newWidth = newCols * mobileGridSize;
-        let newHeight = newRows * mobileGridSize;
+            // Calcular las dimensiones finales
+            let newWidth = newCols * mobileGridSize;
+            let newHeight = newRows * mobileGridSize;
 
-        // Actualizar las dimensiones del canvas
-        canvas.width = newWidth;
-        canvas.height = newHeight;
+            // Actualizar las dimensiones del canvas
+            canvas.width = newWidth;
+            canvas.height = newHeight;
 
-        // Actualizar las variables globales con el nuevo tamaño de cuadrícula
-        GRID_SIZE = mobileGridSize;
+            // Actualizar las variables globales con el nuevo tamaño de cuadrícula
+            GRID_SIZE = mobileGridSize;
+
+            // Ajustar el estilo del canvas para que se muestre correctamente
+            canvas.style.maxHeight = 'none'; // Eliminar restricción de altura máxima
+            canvas.style.maxWidth = '100%';  // Asegurar que no exceda el ancho del contenedor
+
+            // Ajustar el contenedor del canvas para centrar verticalmente
+            canvasContainer.style.alignItems = 'center';
+            canvasContainer.style.justifyContent = 'center';
+
+            console.log(`Canvas móvil redimensionado a: ${newWidth}x${newHeight}, Grid: ${GRID_SIZE}`);
+        } catch (error) {
+            console.error("Error al redimensionar canvas para móvil:", error);
+            // Fallback a dimensiones seguras
+            canvas.width = 300;
+            canvas.height = 450;
+            GRID_SIZE = 15;
+        }
     } else {
         // Para dispositivos de escritorio, mantener la proporción original
-        const aspectRatio = 800 / 600; // Proporción original del canvas
-        let newWidth = Math.min(availableWidth, 800); // Limitar a 800px máximo
-        let newHeight = newWidth / aspectRatio;
+        try {
+            const aspectRatio = 4 / 3; // Proporción original del canvas
+            let newWidth = Math.min(availableWidth, 800); // Limitar a 800px máximo
+            let newHeight = newWidth / aspectRatio;
 
-        // Redondear a múltiplos del tamaño de la cuadrícula
-        newWidth = Math.floor(newWidth / GRID_SIZE) * GRID_SIZE;
-        newHeight = Math.floor(newHeight / GRID_SIZE) * GRID_SIZE;
+            // Redondear a múltiplos del tamaño de la cuadrícula
+            const desktopGridSize = 20; // Tamaño de cuadrícula para escritorio
+            newWidth = Math.floor(newWidth / desktopGridSize) * desktopGridSize;
+            newHeight = Math.floor(newHeight / desktopGridSize) * desktopGridSize;
 
-        // Actualizar las dimensiones del canvas
-        canvas.width = newWidth;
-        canvas.height = newHeight;
+            // Actualizar las dimensiones del canvas
+            canvas.width = newWidth;
+            canvas.height = newHeight;
+
+            // Actualizar las variables globales con el tamaño de cuadrícula para escritorio
+            GRID_SIZE = desktopGridSize;
+
+            // Restaurar estilos para escritorio
+            canvas.style.maxHeight = '80vh';
+            canvas.style.maxWidth = '100%';
+
+            console.log(`Canvas escritorio redimensionado a: ${newWidth}x${newHeight}, Grid: ${GRID_SIZE}`);
+        } catch (error) {
+            console.error("Error al redimensionar canvas para escritorio:", error);
+            // Fallback a dimensiones seguras
+            canvas.width = 600;
+            canvas.height = 450;
+            GRID_SIZE = 20;
+        }
     }
 
     // Actualizar las variables globales
     CANVAS_WIDTH = canvas.width;
     CANVAS_HEIGHT = canvas.height;
-    ROWS = CANVAS_HEIGHT / GRID_SIZE;
-    COLS = CANVAS_WIDTH / GRID_SIZE;
+    ROWS = Math.floor(CANVAS_HEIGHT / GRID_SIZE);
+    COLS = Math.floor(CANVAS_WIDTH / GRID_SIZE);
 
     // Mostrar u ocultar el indicador de deslizamiento según el dispositivo
     if (swipeIndicator) {
@@ -3782,14 +3904,29 @@ function resizeCanvas() {
 
     // Reposicionar la comida si está fuera de los límites
     if (food && (food.x >= CANVAS_WIDTH || food.y >= CANVAS_HEIGHT)) {
-        createFood();
+        generateFood(); // Usar la función correcta para generar comida
     }
 
     // Ajustar la posición de la serpiente si está fuera de los límites
     if (snake && snake.length > 0) {
+        let needsAdjustment = false;
+
         for (let i = 0; i < snake.length; i++) {
-            if (snake[i].x >= CANVAS_WIDTH) snake[i].x = CANVAS_WIDTH - GRID_SIZE;
-            if (snake[i].y >= CANVAS_HEIGHT) snake[i].y = CANVAS_HEIGHT - GRID_SIZE;
+            if (snake[i].x >= CANVAS_WIDTH) {
+                snake[i].x = CANVAS_WIDTH - GRID_SIZE;
+                needsAdjustment = true;
+            }
+            if (snake[i].y >= CANVAS_HEIGHT) {
+                snake[i].y = CANVAS_HEIGHT - GRID_SIZE;
+                needsAdjustment = true;
+            }
+        }
+
+        // Si hubo ajustes, forzar un redibujado
+        if (needsAdjustment && animationFrameId) {
+            clearCanvas();
+            drawSnake();
+            drawFood();
         }
     }
 }
@@ -3800,6 +3937,13 @@ function setupTouchControls() {
     function handleTouchDirection(direction) {
         if (isGameOver) return;
 
+        // Si el juego no ha comenzado, iniciar el juego al detectar un deslizamiento
+        if (!animationFrameId && startButton && startButton.style.display !== 'none') {
+            // Simular clic en el botón de inicio
+            startButton.click();
+            return; // Salir para no cambiar la dirección inmediatamente
+        }
+
         // Prevenir cambios rápidos de dirección
         if (changingDirection) return;
         changingDirection = true;
@@ -3807,25 +3951,25 @@ function setupTouchControls() {
         // Cambiar dirección según el gesto de deslizamiento
         switch(direction) {
             case 'up':
-                if (dy === 0) { // Solo si no está yendo hacia abajo o arriba
+                if (dy === 0 || dy === GRID_SIZE) { // Permitir cambio de dirección si va hacia abajo
                     dx = 0;
                     dy = -GRID_SIZE;
                 }
                 break;
             case 'down':
-                if (dy === 0) { // Solo si no está yendo hacia arriba o abajo
+                if (dy === 0 || dy === -GRID_SIZE) { // Permitir cambio de dirección si va hacia arriba
                     dx = 0;
                     dy = GRID_SIZE;
                 }
                 break;
             case 'left':
-                if (dx === 0) { // Solo si no está yendo hacia derecha o izquierda
+                if (dx === 0 || dx === GRID_SIZE) { // Permitir cambio de dirección si va hacia la derecha
                     dx = -GRID_SIZE;
                     dy = 0;
                 }
                 break;
             case 'right':
-                if (dx === 0) { // Solo si no está yendo hacia izquierda o derecha
+                if (dx === 0 || dx === -GRID_SIZE) { // Permitir cambio de dirección si va hacia la izquierda
                     dx = GRID_SIZE;
                     dy = 0;
                 }
@@ -3846,20 +3990,21 @@ function setupTouchControls() {
     let touchStartY = 0;
     let touchEndX = 0;
     let touchEndY = 0;
+    let touchMoved = false; // Para detectar si hubo movimiento real
 
     // Umbral mínimo de deslizamiento para detectar un swipe (en píxeles)
-    const swipeThreshold = 30;
+    const swipeThreshold = 20; // Reducido para mayor sensibilidad en móviles
 
     // Función para manejar el inicio del toque
     function handleTouchStart(e) {
-        if (isGameOver) return;
-
+        // Capturar el toque incluso si el juego no ha comenzado
         const touch = e.touches[0];
         touchStartX = touch.clientX;
         touchStartY = touch.clientY;
+        touchMoved = false;
 
-        // Mostrar el indicador de deslizamiento al iniciar el juego
-        if (swipeIndicator && !swipeIndicator.classList.contains('active') && !isGameOver) {
+        // Mostrar el indicador de deslizamiento si el juego está activo
+        if (swipeIndicator && !swipeIndicator.classList.contains('active') && !isGameOver && animationFrameId) {
             swipeIndicator.classList.remove('hidden');
             swipeIndicator.classList.add('active');
             swipeIndicator.style.display = 'flex';
@@ -3867,11 +4012,9 @@ function setupTouchControls() {
     }
 
     // Función para manejar el fin del toque
-    function handleTouchEnd() {
-        if (isGameOver) return;
-
-        // Si no hay toque previo, salir
-        if (touchStartX === 0 && touchStartY === 0) return;
+    function handleTouchEnd(e) {
+        // Si no hay toque previo o no hubo movimiento, salir
+        if (touchStartX === 0 && touchStartY === 0 || !touchMoved) return;
 
         // Calcular la distancia y dirección del swipe
         const deltaX = touchEndX - touchStartX;
@@ -3903,24 +4046,52 @@ function setupTouchControls() {
         touchStartY = 0;
         touchEndX = 0;
         touchEndY = 0;
+        touchMoved = false;
     }
 
     // Función para manejar el movimiento del toque
     function handleTouchMove(e) {
-        if (isGameOver) return;
-
         // Prevenir el desplazamiento de la página
         e.preventDefault();
 
         const touch = e.touches[0];
         touchEndX = touch.clientX;
         touchEndY = touch.clientY;
+
+        // Marcar que hubo movimiento si supera un umbral mínimo
+        const deltaX = touchEndX - touchStartX;
+        const deltaY = touchEndY - touchStartY;
+        if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+            touchMoved = true;
+        }
+    }
+
+    // Función para manejar clics/toques en el canvas (para iniciar el juego)
+    function handleCanvasClick(e) {
+        // Si el juego no ha comenzado y el botón de inicio está visible, iniciar el juego
+        if (!animationFrameId && startButton && startButton.style.display !== 'none') {
+            startButton.click();
+        }
+        // Si el juego ha terminado y el botón de reinicio está visible, reiniciar el juego
+        else if (isGameOver && restartButton && restartButton.style.display !== 'none') {
+            restartButton.click();
+        }
     }
 
     // Añadir event listeners para gestos de deslizamiento en el canvas
-    canvas.addEventListener('touchstart', handleTouchStart, false);
+    canvas.addEventListener('touchstart', handleTouchStart, { passive: true });
     canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
-    canvas.addEventListener('touchend', handleTouchEnd, false);
+    canvas.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    // Añadir event listener para clics/toques en el canvas
+    canvas.addEventListener('click', handleCanvasClick);
+
+    // Añadir event listeners para toda la página en dispositivos móviles
+    if (isMobileDevice || window.innerWidth < 768) {
+        document.addEventListener('touchstart', handleTouchStart, { passive: true });
+        document.addEventListener('touchmove', handleTouchMove, { passive: false });
+        document.addEventListener('touchend', handleTouchEnd, { passive: true });
+    }
 
     // Mostrar el indicador de deslizamiento al iniciar el juego en dispositivos móviles
     if (swipeIndicator && (isMobileDevice || window.innerWidth < 768)) {
@@ -3928,10 +4099,12 @@ function setupTouchControls() {
 
         // Ocultar el indicador después de 5 segundos
         setTimeout(() => {
-            if (swipeIndicator.classList.contains('active')) {
+            if (swipeIndicator && swipeIndicator.classList.contains('active')) {
                 swipeIndicator.classList.add('hidden');
                 setTimeout(() => {
-                    swipeIndicator.style.display = 'none';
+                    if (swipeIndicator) {
+                        swipeIndicator.style.display = 'none';
+                    }
                 }, 500);
             }
         }, 5000);
